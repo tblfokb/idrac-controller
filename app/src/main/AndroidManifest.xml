@@ -29,6 +29,14 @@
             android:name=".SettingsActivity"
             android:exported="false" />
 
+        <activity
+            android:name=".SensorActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".HardwareInfoActivity"
+            android:exported="false" />
+
     </application>
 
 </manifest>

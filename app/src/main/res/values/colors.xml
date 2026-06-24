@@ -1,39 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- 主色调 -->
-    <color name="primary">#00BCD4</color>
-    <color name="primary_dark">#0097A7</color>
-    <color name="primary_light">#B2EBF2</color>
+    <!-- ===== 背景层级 ===== -->
+    <color name="background">#080C17</color>
+    <color name="surface">#151A2E</color>
+    <color name="surface_alt">#1A1F38</color>
 
-    <!-- 背景色 -->
-    <color name="background">#0D1117</color>
-    <color name="surface">#161B22</color>
-    <color name="card_bg">#1C2333</color>
-    <color name="card_stroke">#2A3348</color>
+    <!-- ===== 玻璃卡片 ===== -->
+    <color name="glass_bg">#18FFFFFF</color>
+    <color name="glass_border">#22FFFFFF</color>
+    <color name="glass_glow">#30FFFFFF</color>
 
-    <!-- 功能色 -->
-    <color name="success">#4CAF50</color>
-    <color name="success_dark">#388E3C</color>
-    <color name="danger">#EF5350</color>
-    <color name="danger_dark">#D32F2F</color>
-    <color name="warning">#FF9800</color>
-    <color name="warning_dark">#F57C00</color>
-    <color name="info">#42A5F5</color>
-    <color name="info_dark">#1E88E5</color>
-    <color name="secondary">#607D8B</color>
-    <color name="secondary_dark">#455A64</color>
+    <!-- ===== 主题色 (霓虹青/蓝) ===== -->
+    <color name="accent">#00E5FF</color>
+    <color name="accent_dim">#0097A7</color>
+    <color name="accent_glow">#4000E5FF</color>
 
-    <!-- 文字 -->
-    <color name="text_primary">#E6EDF3</color>
-    <color name="text_secondary">#8B949E</color>
-    <color name="text_hint">#484F58</color>
+    <!-- ===== 功能色 (玻璃感) ===== -->
+    <color name="green">#00E676</color>
+    <color name="green_dark">#008B3A</color>
+    <color name="green_glow">#4000E676</color>
+    <color name="red">#FF5252</color>
+    <color name="red_dark">#B71C1C</color>
+    <color name="red_glow">#40FF5252</color>
+    <color name="orange">#FFB74D</color>
+    <color name="orange_dark">#E65100</color>
+    <color name="orange_glow">#40FFB74D</color>
+    <color name="blue_soft">#448AFF</color>
+    <color name="blue_glow">#40448AFF</color>
+
+    <!-- ===== 文字 ===== -->
+    <color name="text_primary">#E8ECFF</color>
+    <color name="text_secondary">#8890B0</color>
     <color name="text_on_primary">#FFFFFF</color>
+    <color name="text_dim">#5A6080</color>
 
-    <!-- 输入框 -->
-    <color name="input_bg">#0D1117</color>
-    <color name="input_stroke">#30363D</color>
-    <color name="input_stroke_focus">#00BCD4</color>
-
-    <!-- 旧颜色保留兼容 -->
-    <color name="accent">#00BCD4</color>
+    <!-- ===== 渐变端点 ===== -->
+    <color name="gradient_start">#0D1525</color>
+    <color name="gradient_mid">#111B30</color>
+    <color name="gradient_end">#0A0E1A</color>
 </resources>

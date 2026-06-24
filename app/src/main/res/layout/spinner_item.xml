@@ -5,4 +5,4 @@
     android:textColor="@color/text_primary"
     android:textSize="15sp"
     android:padding="14dp"
-    android:background="@color/card_bg" />
+    android:background="@color/surface" />

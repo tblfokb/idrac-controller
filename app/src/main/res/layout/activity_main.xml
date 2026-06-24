@@ -10,66 +10,104 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:gravity="center_horizontal"
-        android:padding="20dp">
+        android:padding="16dp">
 
-        <!-- ==================== 头部区域 ==================== -->
+        <!-- ====== 头部 ====== -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center"
-            android:layout_marginBottom="4dp">
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="18dp">
 
-            <!-- Logo / 标题行 -->
-            <LinearLayout
+            <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center"
-                android:layout_marginBottom="4dp">
+                android:text="iDRAC"
+                android:textSize="28sp"
+                android:textStyle="bold"
+                android:textColor="@color/accent"
+                android:letterSpacing="0.12"
+                android:shadowColor="@color/accent_glow"
+                android:shadowRadius="12"
+                android:layout_marginBottom="2dp" />
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="🖥"
-                    android:textSize="28sp"
-                    android:layout_marginEnd="8dp" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="REMOTE CONTROLLER"
+                android:textSize="9sp"
+                android:textColor="@color/text_dim"
+                android:letterSpacing="0.2" />
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="iDRAC 远程控制"
-                    android:textSize="22sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/text_primary" />
-            </LinearLayout>
-
-            <!-- 模式指示 -->
             <TextView
                 android:id="@+id/text_mode"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="SSH（iDRAC 6/7/8）"
-                android:textSize="11sp"
+                android:text="SSH"
+                android:textSize="10sp"
                 android:textColor="@color/text_secondary"
-                android:paddingHorizontal="12dp"
-                android:paddingVertical="3dp"
-                android:layout_marginBottom="16dp" />
+                android:layout_marginTop="6dp"
+                android:paddingHorizontal="14dp"
+                android:paddingVertical="4dp"
+                android:background="@drawable/input_bg" />
         </LinearLayout>
 
-        <!-- ==================== 服务器状态卡片 ==================== -->
+        <!-- ====== 服务器选择 ====== -->
+        <LinearLayout
+            android:id="@+id/layout_server_selector"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:background="@drawable/card_bg"
+            android:padding="12dp"
+            android:layout_marginBottom="16dp">
+
+            <TextView
+                android:id="@+id/text_server_name"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="默认服务器"
+                android:textSize="14sp"
+                android:textColor="@color/text_primary"
+                android:textStyle="bold" />
+
+            <Button
+                android:id="@+id/btn_switch_server"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:text="↻"
+                android:textSize="18sp"
+                android:textColor="@color/accent"
+                android:background="@drawable/input_bg" />
+
+            <Button
+                android:id="@+id/btn_add_server"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:text="+"
+                android:textSize="20sp"
+                android:textColor="@color/accent"
+                android:background="@drawable/input_bg"
+                android:layout_marginStart="6dp" />
+        </LinearLayout>
+
+        <!-- ====== 服务器状态卡片 ====== -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:background="@drawable/card_bg"
             android:padding="16dp"
-            android:layout_marginBottom="20dp">
+            android:layout_marginBottom="14dp">
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="📡 服务器状态"
+                android:text="SERVER STATUS"
                 style="@style/CardTitle"
                 android:layout_marginBottom="12dp" />
 
@@ -78,97 +116,240 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:text="点击下方按钮操作服务器"
-                android:textSize="15sp"
+                android:text="· · ·"
+                android:textSize="16sp"
                 android:textColor="@color/text_secondary"
-                android:padding="12dp"
-                android:minHeight="60dp" />
+                android:padding="8dp"
+                android:minHeight="48dp" />
 
             <Button
                 android:id="@+id/btn_check_status"
                 android:layout_width="match_parent"
-                android:layout_height="44dp"
-                android:text="查询电源状态"
-                android:textSize="14sp"
+                android:layout_height="42dp"
+                android:text="CHECK  ·  查询电源状态"
+                android:textSize="13sp"
                 android:textColor="@color/text_on_primary"
                 android:background="@drawable/btn_check"
-                android:layout_marginTop="8dp" />
+                android:layout_marginTop="6dp" />
         </LinearLayout>
 
-        <!-- ==================== 电源控制卡片 ==================== -->
+        <!-- ====== 电源控制卡片 ====== -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:background="@drawable/card_bg"
             android:padding="16dp"
-            android:layout_marginBottom="20dp">
+            android:layout_marginBottom="14dp">
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="⚡ 电源控制"
+                android:text="POWER CONTROL"
                 style="@style/CardTitle"
                 android:layout_marginBottom="12dp" />
 
-            <!-- 开机 / 关机 (并排) -->
+            <!-- 开机 / 关机 -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:layout_marginBottom="12dp">
+                android:layout_marginBottom="10dp">
 
                 <Button
                     android:id="@+id/btn_power_on"
                     android:layout_width="0dp"
-                    android:layout_height="64dp"
+                    android:layout_height="60dp"
                     android:layout_weight="1"
-                    android:text="开  机"
-                    android:textSize="18sp"
+                    android:text="POWER ON"
+                    android:textSize="15sp"
                     android:textStyle="bold"
                     android:textColor="@color/text_on_primary"
                     android:background="@drawable/btn_power_on"
-                    android:layout_marginEnd="8dp" />
+                    android:layout_marginEnd="6dp" />
 
                 <Button
                     android:id="@+id/btn_power_off"
                     android:layout_width="0dp"
-                    android:layout_height="64dp"
+                    android:layout_height="60dp"
                     android:layout_weight="1"
-                    android:text="关  机"
-                    android:textSize="18sp"
+                    android:text="POWER OFF"
+                    android:textSize="15sp"
                     android:textStyle="bold"
                     android:textColor="@color/text_on_primary"
                     android:background="@drawable/btn_power_off"
-                    android:layout_marginStart="8dp" />
+                    android:layout_marginStart="6dp" />
             </LinearLayout>
 
-            <!-- 重启 (全宽) -->
+            <!-- 重启 -->
             <Button
                 android:id="@+id/btn_power_cycle"
                 android:layout_width="match_parent"
-                android:layout_height="56dp"
-                android:text="重  启"
-                android:textSize="17sp"
+                android:layout_height="50dp"
+                android:text="RESTART  ·  强制重启"
+                android:textSize="13sp"
                 android:textStyle="bold"
                 android:textColor="@color/text_on_primary"
-                android:background="@drawable/btn_restart" />
+                android:background="@drawable/btn_restart"
+                android:layout_marginBottom="10dp" />
+
+            <!-- 优雅操作 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btn_graceful_shutdown"
+                    android:layout_width="0dp"
+                    android:layout_height="42dp"
+                    android:layout_weight="1"
+                    android:text="优雅关机"
+                    android:textSize="12sp"
+                    android:textColor="@color/text_secondary"
+                    android:background="@drawable/input_bg"
+                    android:layout_marginEnd="6dp" />
+
+                <Button
+                    android:id="@+id/btn_graceful_restart"
+                    android:layout_width="0dp"
+                    android:layout_height="42dp"
+                    android:layout_weight="1"
+                    android:text="优雅重启"
+                    android:textSize="12sp"
+                    android:textColor="@color/text_secondary"
+                    android:background="@drawable/input_bg"
+                    android:layout_marginStart="6dp" />
+            </LinearLayout>
         </LinearLayout>
 
-        <!-- ==================== 设置按钮 ==================== -->
+        <!-- ====== 传感器快捷视图 ====== -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/card_bg"
+            android:padding="16dp"
+            android:layout_marginBottom="14dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="10dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="SENSORS"
+                    style="@style/CardTitle" />
+
+                <Button
+                    android:id="@+id/btn_sensor_detail"
+                    android:layout_width="wrap_content"
+                    android:layout_height="30dp"
+                    android:text="详细 ›"
+                    android:textSize="11sp"
+                    android:textColor="@color/accent"
+                    android:background="@null"
+                    android:minWidth="0dp" />
+            </LinearLayout>
+
+            <!-- 传感器行 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="8dp">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:background="@drawable/sensor_card"
+                    android:padding="10dp"
+                    android:layout_marginEnd="6dp">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="CPU" style="@style/SensorLabel" />
+                    <TextView android:id="@+id/text_cpu_temp"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="--" style="@style/SensorValue" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="°C" android:textSize="9sp" android:textColor="@color/text_dim" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:background="@drawable/sensor_card"
+                    android:padding="10dp"
+                    android:layout_marginEnd="6dp">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="FAN" style="@style/SensorLabel" />
+                    <TextView android:id="@+id/text_fan_speed"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="--" style="@style/SensorValue" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="RPM" android:textSize="9sp" android:textColor="@color/text_dim" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:background="@drawable/sensor_card"
+                    android:padding="10dp">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="PWR" style="@style/SensorLabel" />
+                    <TextView android:id="@+id/text_power_watt"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="--" style="@style/SensorValue" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="W" android:textSize="9sp" android:textColor="@color/text_dim" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/btn_refresh_sensors"
+                android:layout_width="match_parent"
+                android:layout_height="36dp"
+                android:text="↻ 刷新传感器"
+                android:textSize="12sp"
+                android:textColor="@color/text_secondary"
+                android:background="@drawable/input_bg" />
+        </LinearLayout>
+
+        <!-- ====== 硬件信息入口 ====== -->
+        <Button
+            android:id="@+id/btn_hardware_info"
+            android:layout_width="match_parent"
+            android:layout_height="46dp"
+            android:text="🖥  硬件清单  ·  CPU / 内存 / 磁盘"
+            android:textSize="12sp"
+            android:textColor="@color/text_secondary"
+            android:background="@drawable/card_bg"
+            android:layout_marginBottom="16dp" />
+
+        <!-- ====== 设置入口 ====== -->
         <Button
             android:id="@+id/btn_settings"
             android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:text="设  置"
-            android:textSize="15sp"
-            android:textColor="@color/text_on_primary"
-            android:background="@drawable/btn_settings" />
+            android:layout_height="44dp"
+            android:text="⚙  设 置"
+            android:textSize="14sp"
+            android:textColor="@color/accent"
+            android:background="@drawable/btn_settings"
+            android:layout_marginBottom="16dp" />
 
-        <!-- 底部留白 -->
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="16dp" />
-
+        <View android:layout_width="match_parent" android:layout_height="24dp" />
     </LinearLayout>
 </ScrollView>
