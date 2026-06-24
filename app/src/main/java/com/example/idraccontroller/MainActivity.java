@@ -8,6 +8,11 @@ import android.text.method.ScrollingMovementMethod;
 import android.widget.*;
 import java.util.List;
 
+/**
+ * 主 Activity：显示服务器状态、电源控制、传感器监控、硬件信息
+ * 优化：一次 SSH 会话获取所有信息（电源状态+传感器+硬件信息）
+ */
+@SuppressWarnings("deprecation") // 兼容 minSdk=21，不使用 AndroidX
 public class MainActivity extends Activity {
 
     private TextView textStatus, textMode, textServerName;
@@ -17,6 +22,9 @@ public class MainActivity extends Activity {
     private Button btnSwitchServer, btnAddServer, btnSshTerminal;
     private IdracApiService apiService;
 
+    /**
+     * Activity 创建时调用：初始化所有 UI 控件和事件监听
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -65,6 +73,9 @@ public class MainActivity extends Activity {
         btnCheckStatus.setOnClickListener(v -> checkStatus());
     }
 
+    /**
+     * Activity 恢复时调用：刷新服务器显示和连接模式
+     */
     @Override
     protected void onResume() {
         super.onResume();
@@ -72,6 +83,9 @@ public class MainActivity extends Activity {
         updateModeDisplay();
     }
 
+    /**
+     * 更新服务器名称显示，如果未配置则创建默认服务器
+     */
     private void updateServerDisplay() {
         ServerManager.applyActiveToPrefs(this);
         ServerConfig active = ServerManager.getActiveServer(this);
@@ -94,6 +108,9 @@ public class MainActivity extends Activity {
         }
     }
 
+    /**
+     * 显示服务器选择对话框，允许用户切换当前活跃服务器
+     */
     private void showServerPicker() {
         List<ServerConfig> servers = ServerManager.getServers(this);
         if (servers.isEmpty()) {
@@ -121,6 +138,9 @@ public class MainActivity extends Activity {
         textMode.setText("SSH 连接模式");
     }
 
+    /**
+     * 批量启用/禁用电源控制按钮（防止重复点击）
+     */
     private void setPowerButtons(boolean enabled) {
         btnPowerOn.setEnabled(enabled);
         btnPowerOff.setEnabled(enabled);

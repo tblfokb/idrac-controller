@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 开机按钮 - 绿色水波纹 -->
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="#4000E676">
+    <!-- 正常状态背景 -->
+    <item android:drawable="@drawable/btn_power_on" />
+</ripple>

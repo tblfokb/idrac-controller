@@ -135,12 +135,13 @@
             <Button
                 android:id="@+id/btn_check_status"
                 android:layout_width="match_parent"
-                android:layout_height="48dp"
+                android:layout_height="50dp"
                 android:text="🔍 查 询 服 务 器 状 态"
-                android:textSize="14sp"
+                android:textSize="15sp"
+                android:textStyle="bold"
                 android:textColor="@color/text_on_primary"
-                android:background="@drawable/btn_check"
-                android:layout_marginTop="12dp" />
+                android:background="@drawable/ripple_check"
+                android:layout_marginTop="14dp" />
         </LinearLayout>
 
         <!-- ====== 电源控制卡片 ====== -->
@@ -168,38 +169,38 @@
                 <Button
                     android:id="@+id/btn_power_on"
                     android:layout_width="0dp"
-                    android:layout_height="68dp"
+                    android:layout_height="72dp"
                     android:layout_weight="1"
-                    android:text="开机"
-                    android:textSize="16sp"
+                    android:text="开 机"
+                    android:textSize="17sp"
                     android:textStyle="bold"
                     android:textColor="@color/text_on_primary"
-                    android:background="@drawable/btn_power_on"
-                    android:layout_marginEnd="8dp" />
+                    android:background="@drawable/ripple_green"
+                    android:layout_marginEnd="10dp" />
 
                 <Button
                     android:id="@+id/btn_power_off"
                     android:layout_width="0dp"
-                    android:layout_height="68dp"
+                    android:layout_height="72dp"
                     android:layout_weight="1"
-                    android:text="关机"
-                    android:textSize="16sp"
+                    android:text="关 机"
+                    android:textSize="17sp"
                     android:textStyle="bold"
                     android:textColor="@color/text_on_primary"
-                    android:background="@drawable/btn_power_off"
-                    android:layout_marginStart="8dp" />
+                    android:background="@drawable/ripple_red"
+                    android:layout_marginStart="10dp" />
             </LinearLayout>
 
             <Button
                 android:id="@+id/btn_power_cycle"
                 android:layout_width="match_parent"
-                android:layout_height="54dp"
+                android:layout_height="56dp"
                 android:text="🔄 强 制 重 启"
-                android:textSize="14sp"
+                android:textSize="15sp"
                 android:textStyle="bold"
                 android:textColor="@color/text_on_primary"
-                android:background="@drawable/btn_restart"
-                android:layout_marginBottom="16dp" />
+                android:background="@drawable/ripple_orange"
+                android:layout_marginBottom="18dp" />
         </LinearLayout>
 
         <!-- ====== 传感器快捷视图 ====== -->
@@ -312,27 +313,27 @@
                 android:maxLines="20" />
         </LinearLayout>
 
-        <!-- ====== SSH 终端入口 ====== -->
         <Button
             android:id="@+id/btn_ssh_terminal"
             android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:text="💻 SSH 终端"
+            android:layout_height="50dp"
+            android:text="💻 SSH 终 端"
             android:textSize="15sp"
+            android:textStyle="bold"
             android:textColor="@color/accent"
-            android:background="@drawable/btn_settings"
-            android:layout_marginBottom="16dp" />
+            android:background="@drawable/ripple_accent"
+            android:layout_marginBottom="14dp" />
 
         <!-- ====== 设置入口 ====== -->
-        <Button
-            android:id="@+id/btn_settings"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:text="⚙️  设 置"
-            android:textSize="15sp"
-            android:textColor="@color/accent"
-            android:background="@drawable/btn_settings"
-            android:layout_marginBottom="16dp" />
+            <Button
+                android:id="@+id/btn_settings"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:text="⚙️  设 置"
+                android:textSize="15sp"
+                android:textColor="@color/accent"
+                android:background="@drawable/ripple_accent"
+                android:layout_marginBottom="12dp" />
 
         <View android:layout_width="match_parent" android:layout_height="32dp" />
     </LinearLayout>

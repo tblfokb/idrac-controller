@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 关机按钮 - 红色水波纹 -->
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="#40FF5252">
+    <!-- 正常状态背景 -->
+    <item android:drawable="@drawable/btn_power_off" />
+</ripple>

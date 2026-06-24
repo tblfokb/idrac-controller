@@ -25,9 +25,9 @@
                 android:layout_width="44dp"
                 android:layout_height="44dp"
                 android:text="←"
-                android:textSize="16sp"
+                android:textSize="18sp"
                 android:textColor="@color/accent"
-                android:background="@drawable/input_bg" />
+                android:background="@drawable/ripple_transparent" />
 
             <TextView
                 android:layout_width="0dp"
@@ -153,22 +153,23 @@
         <Button
             android:id="@+id/btn_save"
             android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:text="保存配置"
-            android:textSize="15sp"
+            android:layout_height="52dp"
+            android:text="💾 保 存 配 置"
+            android:textSize="16sp"
             android:textStyle="bold"
             android:textColor="@color/text_on_primary"
-            android:background="@drawable/btn_save"
-            android:layout_marginBottom="12dp" />
+            android:background="@drawable/ripple_save"
+            android:layout_marginBottom="14dp" />
 
         <Button
             android:id="@+id/btn_delete"
             android:layout_width="match_parent"
-            android:layout_height="46dp"
-            android:text="删除此服务器"
+            android:layout_height="48dp"
+            android:text="🗑 删 除 此 服 务 器"
             android:textSize="13sp"
             android:textColor="@color/red"
-            android:background="@drawable/input_bg" />
+            android:background="@drawable/input_bg"
+            android:layout_marginBottom="8dp" />
 
         <View android:layout_width="match_parent" android:layout_height="24dp" />
     </LinearLayout>

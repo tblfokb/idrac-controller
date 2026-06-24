@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 重启按钮 - 橙色水波纹 -->
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="#40FFB74D">
+    <!-- 正常状态背景 -->
+    <item android:drawable="@drawable/btn_restart" />
+</ripple>

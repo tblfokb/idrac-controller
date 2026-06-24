@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 查询状态按钮 - 蓝色水波纹 -->
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="#404488FF">
+    <!-- 正常状态背景 -->
+    <item android:drawable="@drawable/btn_check" />
+</ripple>

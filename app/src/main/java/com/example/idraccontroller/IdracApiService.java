@@ -4,6 +4,12 @@ import android.content.Context;
 import com.jcraft.jsch.*;
 import java.io.*;
 
+/**
+ * iDRAC API 服务：通过 SSH 执行 racadm 命令
+ * 优化：一次 SSH 会话执行多条命令（runSshCommandsInOneSession）
+ * 优化：30 秒缓存避免重复查询（getAllInfo()）
+ */
+@SuppressWarnings("deprecation") // 兼容 minSdk=21，不使用 AndroidX
 public class IdracApiService {
 
     private Context context;
@@ -267,24 +273,45 @@ public class IdracApiService {
 
     // ===================== 公开接口 =====================
 
+    // 缓存：上次查询结果和时间
+    private static SshResult[] lastAllInfoResults = null;
+    private static long lastAllInfoTime = 0;
+    private static final long CACHE_TTL = 30 * 1000; // 30秒缓存
+
     /**
-     * 一次 SSH 会话同时获取：电源状态 + 传感器 + 硬件信息 + CPU信息 + 内存信息（性能优化）
+     * 一次 SSH 会话同时获取：电源状态 + 传感器 + 硬件信息（性能优化）
      * 返回数组：[0]=电源状态, [1]=传感器数据, [2]=硬件信息, [3]=CPU信息, [4]=内存信息
+     * 优化：只发3条命令（CPU/内存信息已包含在 getsysinfo 输出中）
+     * 优化：30秒缓存避免重复SSH连接
      */
     public SshResult[] getAllInfo() {
+        long now = System.currentTimeMillis();
+        // 缓存命中：30秒内直接返回上次结果（避免重复SSH连接）
+        if (lastAllInfoResults != null && (now - lastAllInfoTime) < CACHE_TTL) {
+            return lastAllInfoResults;
+        }
+        // 一次SSH会话发3条命令（不是5条）
         SshResult[] results = runSshCommandsInOneSession(
             "serveraction powerstatus",
             "getsensorinfo",
-            "getsysinfo",
-            "get System.Embedded.1/Processors",  // 尝试获取CPU信息
-            "get System.Embedded.1/Memory"        // 尝试获取内存信息
+            "getsysinfo"
         );
-        // 如果合并方法没拿到数据，分别单独重试
+        // 如果某条命令失败，单独重试一次
         if (!results[0].hasData()) results[0] = runSshCommand("serveraction powerstatus");
         if (!results[1].hasData()) results[1] = runSshCommand("getsensorinfo");
         if (!results[2].hasData()) results[2] = runSshCommand("getsysinfo");
-        // CPU和内存信息如果获取失败，不影响主要功能
-        return results;
+        // CPU和内存信息已包含在 getsysinfo 输出中，直接复用（避免数组越界）
+        // 创建长度为5的数组，兼容 MainActivity 的访问方式
+        SshResult[] fullResults = new SshResult[5];
+        fullResults[0] = results[0];
+        fullResults[1] = results[1];
+        fullResults[2] = results[2];
+        fullResults[3] = results[2]; // CPU信息（从硬件信息中解析）
+        fullResults[4] = results[2]; // 内存信息（从硬件信息中解析）
+        // 更新缓存
+        lastAllInfoResults = fullResults;
+        lastAllInfoTime = now;
+        return fullResults;
     }
 
     /** 一次 SSH 会话同时获取传感器 + 硬件信息（性能优化） */
@@ -296,6 +323,10 @@ public class IdracApiService {
         return results;
     }
 
+    /**
+     * 获取服务器电源状态
+     * @return 电源状态字符串（例如 "电源: ON"）
+     */
     public String getPowerStatus() {
         SshResult r = runSshCommand("serveraction powerstatus");
         if (r.hasData()) {
@@ -309,6 +340,11 @@ public class IdracApiService {
         return r.error != null && !r.error.isEmpty() ? r.error : "查询失败";
     }
 
+    /**
+     * 电源控制（开机/关机/重启）
+     * @param action "on"|"off"|"cycle"
+     * @return 操作结果字符串
+     */
     public String powerControl(String action) {
         String cmd, label;
         switch (action) {
@@ -326,6 +362,9 @@ public class IdracApiService {
         return r.error != null && !r.error.isEmpty() ? r.error : "指令已发送";
     }
 
+    /**
+     * 优雅关机（操作系统级别关机，不是强制断电）
+     */
     public String gracefulShutdown() {
         SshResult r = runSshCommand("serveraction gracefulshutdown");
         if (r.hasData()) {
@@ -336,6 +375,9 @@ public class IdracApiService {
         return r.error != null && !r.error.isEmpty() ? r.error : "指令已发送";
     }
 
+    /**
+     * 优雅重启（操作系统级别重启，不是强制重启）
+     */
     public String gracefulRestart() {
         SshResult r = runSshCommand("serveraction gracefulrestart");
         if (r.hasData()) {
