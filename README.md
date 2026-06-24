@@ -2,6 +2,14 @@
 
 通过 Android 手机远程控制 Dell 服务器电源（开机 / 关机 / 重启 / 查询状态），支持 Redfish API 和 SSH (racadm) 两种模式。
 
+
+## 应用截图
+
+![主界面截图](screenshots/screenshot_main.jpg)
+
+*主界面 - 显示电源状态和控制按钮*
+
+
 ## 功能
 
 - 远程开机 / 关机 / 重启 Dell 服务器
