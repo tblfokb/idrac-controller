@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">iDRAC 控制器</string>
+    <string name="title_idrac_controller">iDRAC 远程控制</string>
+    <string name="ip_hint">例如：192.168.1.100</string>
+    <string name="username_hint">默认：root</string>
+    <string name="password_hint">iDRAC 登录密码</string>
+    <string name="save">保存设置</string>
+    <string name="power_on">开  机</string>
+    <string name="power_off">关  机</string>
+    <string name="power_cycle">重  启</string>
+    <string name="check_status">查询电源状态</string>
+    <string name="settings">设置</string>
+</resources>

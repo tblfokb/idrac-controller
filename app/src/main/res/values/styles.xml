@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- minSdk=21 使用 Material 主题，支持状态栏颜色控制 -->
+    <style name="AppTheme" parent="@android:style/Theme.DeviceDefault.NoActionBar">
+        <!-- 背景 -->
+        <item name="android:windowBackground">@color/background</item>
+        <item name="android:textColor">@color/text_primary</item>
+
+        <!-- 状态栏：深色背景 + 浅色文字 -->
+        <item name="android:statusBarColor">@color/background</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="android:windowLightStatusBar">false</item>
+
+        <!-- 导航栏样式 -->
+        <item name="android:navigationBarColor">@color/background</item>
+        <item name="android:windowLightNavigationBar">false</item>
+    </style>
+
+    <style name="CardTitle" parent="android:Widget.TextView">
+        <item name="android:textSize">15sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/accent</item>
+        <item name="android:letterSpacing">0.1</item>
+    </style>
+
+    <style name="GlassLabel" parent="android:Widget.TextView">
+        <item name="android:textSize">11sp</item>
+        <item name="android:textColor">@color/text_secondary</item>
+        <item name="android:letterSpacing">0.05</item>
+    </style>
+
+    <style name="GlassValue" parent="android:Widget.TextView">
+        <item name="android:textSize">24sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/text_primary</item>
+    </style>
+
+    <style name="SensorLabel" parent="android:Widget.TextView">
+        <item name="android:textSize">11sp</item>
+        <item name="android:textColor">@color/text_secondary</item>
+        <item name="android:gravity">center</item>
+        <item name="android:letterSpacing">0.05</item>
+    </style>
+
+    <style name="SensorValue" parent="android:Widget.TextView">
+        <item name="android:textSize">20sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/accent</item>
+        <item name="android:gravity">center</item>
+        <item name="android:shadowColor">@color/accent_glow</item>
+        <item name="android:shadowRadius">8</item>
+    </style>
+</resources>

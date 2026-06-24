@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="background">#080C17</color>
+    <color name="surface">#151A2E</color>
+    <color name="surface_alt">#1A1F38</color>
+
+    <color name="glass_bg">#18FFFFFF</color>
+    <color name="glass_border">#22FFFFFF</color>
+    <color name="glass_glow">#30FFFFFF</color>
+
+    <color name="accent">#00E5FF</color>
+    <color name="accent_dim">#0097A7</color>
+    <color name="accent_glow">#4000E5FF</color>
+
+    <color name="green">#00E676</color>
+    <color name="green_dark">#008B3A</color>
+    <color name="green_glow">#4000E676</color>
+    <color name="red">#FF5252</color>
+    <color name="red_dark">#B71C1C</color>
+    <color name="red_glow">#40FF5252</color>
+    <color name="orange">#FFB74D</color>
+    <color name="orange_dark">#E65100</color>
+    <color name="orange_glow">#40FFB74D</color>
+    <color name="blue_soft">#448AFF</color>
+    <color name="blue_glow">#40448AFF</color>
+
+    <color name="text_primary">#E8ECFF</color>
+    <color name="text_secondary">#8890B0</color>
+    <color name="text_on_primary">#FFFFFF</color>
+    <color name="text_dim">#5A6080</color>
+
+    <color name="gradient_start">#0D1525</color>
+    <color name="gradient_mid">#111B30</color>
+    <color name="gradient_end">#0A0E1A</color>
+</resources>

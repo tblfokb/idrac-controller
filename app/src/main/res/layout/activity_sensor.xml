@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background"
+    android:fillViewport="true"
+    android:fitsSystemWindows="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="18dp">
+
+            <Button
+                android:id="@+id/btn_back"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:text="\u25c0"
+                android:textSize="16sp"
+                android:textColor="@color/accent"
+                android:background="@drawable/input_bg" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="12dp"
+                android:text="SENSOR MONITOR"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="@color/accent"
+                android:letterSpacing="0.08" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/text_sensor_raw"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="\u70b9\u51fb\u5237\u65b0\u83b7\u53d6\u6570\u636e..."
+            android:textSize="12sp"
+            android:textColor="@color/text_secondary"
+            android:background="@drawable/card_bg"
+            android:padding="16dp"
+            android:fontFamily="monospace"
+            android:lineSpacingExtra="4dp"
+            android:layout_marginBottom="16dp" />
+
+        <Button
+            android:id="@+id/btn_refresh"
+            android:layout_width="match_parent"
+            android:layout_height="44dp"
+            android:text="\u21bb  \u5237\u65b0\u4f20\u611f\u5668\u6570\u636e"
+            android:textSize="14sp"
+            android:textColor="@color/accent"
+            android:background="@drawable/btn_settings" />
+
+    </LinearLayout>
+</ScrollView>
