@@ -122,7 +122,8 @@ public class IdracApiService {
     private String getPowerStatusRedfish() {
         try {
             OkHttpClient client = getClient();
-            String url = getBaseUrl() + "/redfish/v1/Systems/System.Embedded.1";
+            String systemId = discoverMember("Systems", "System.Embedded.1");
+            String url = getBaseUrl() + "/redfish/v1/Systems/" + systemId;
             Request request = new Request.Builder()
                 .url(url)
                 .header("Authorization", getAuth())
@@ -170,7 +171,8 @@ public class IdracApiService {
 
     private String gracefulShutdownRedfish() {
         try {
-            String url = getBaseUrl() + "/redfish/v1/Systems/System.Embedded.1/Actions/ComputerSystem.Reset";
+            String systemId = discoverMember("Systems", "System.Embedded.1");
+            String url = getBaseUrl() + "/redfish/v1/Systems/" + systemId + "/Actions/ComputerSystem.Reset";
             JsonObject json = new JsonObject();
             json.addProperty("ResetType", "GracefulShutdown");
             RequestBody body = RequestBody.create(gson.toJson(json), MediaType.parse("application/json"));
@@ -198,7 +200,8 @@ public class IdracApiService {
 
     private String gracefulRestartRedfish() {
         try {
-            String url = getBaseUrl() + "/redfish/v1/Systems/System.Embedded.1/Actions/ComputerSystem.Reset";
+            String systemId = discoverMember("Systems", "System.Embedded.1");
+            String url = getBaseUrl() + "/redfish/v1/Systems/" + systemId + "/Actions/ComputerSystem.Reset";
             JsonObject json = new JsonObject();
             json.addProperty("ResetType", "GracefulRestart");
             RequestBody body = RequestBody.create(gson.toJson(json), MediaType.parse("application/json"));
@@ -216,6 +219,32 @@ public class IdracApiService {
         return (r.success || r.output.toLowerCase().contains("success")) ? "优雅重启指令已发送" : "结果: " + (r.output.isEmpty() ? r.error : r.output);
     }
 
+    // ===================== 成员自动发现 =====================
+
+    private String discoverMember(String collection, String fallback) {
+        try {
+            OkHttpClient client = getClient();
+            String url = getBaseUrl() + "/redfish/v1/" + collection;
+            Request req = new Request.Builder().url(url).header("Authorization", getAuth())
+                .header("Accept", "application/json").build();
+            Response resp = client.newCall(req).execute();
+            if (resp.isSuccessful() && resp.body() != null) {
+                JsonObject obj = gson.fromJson(resp.body().string(), JsonObject.class);
+                if (obj.has("Members") && obj.getAsJsonArray("Members").size() > 0) {
+                    String odataId = obj.getAsJsonArray("Members").get(0)
+                        .getAsJsonObject().get("@odata.id").getAsString();
+                    String id = odataId.substring(odataId.lastIndexOf('/') + 1);
+                    Log.d(TAG, "Discovered " + collection + " member: " + id);
+                    return id;
+                }
+            }
+            if (resp != null && resp.body() != null) resp.close();
+        } catch (Exception e) {
+            Log.w(TAG, "Failed to discover " + collection + " members: " + e.getMessage());
+        }
+        return fallback;
+    }
+
     // ===================== 传感器数据 =====================
 
     public String getSensorData() {
@@ -231,20 +260,29 @@ public class IdracApiService {
             OkHttpClient client = getClient();
             String baseUrl = getBaseUrl();
 
+            // Auto-discover chassis member ID
+            String chassisId = discoverMember("Chassis", "System.Embedded.1");
+
             // Get thermal data
-            String thermalUrl = baseUrl + "/redfish/v1/Chassis/System.Embedded.1/Thermal";
+            String thermalUrl = baseUrl + "/redfish/v1/Chassis/" + chassisId + "/Thermal";
             Request req = new Request.Builder().url(thermalUrl).header("Authorization", getAuth())
                 .header("Accept", "application/json").build();
             Response resp = client.newCall(req).execute();
             String thermalBody = resp.body() != null ? resp.body().string() : "{}";
+            if (!resp.isSuccessful()) {
+                return "{\"error\":\"Thermal API 返回 " + resp.code() + " (" + thermalUrl + ")\"}";
+            }
             JsonObject thermal = gson.fromJson(thermalBody, JsonObject.class);
 
             // Get power data
-            String powerUrl = baseUrl + "/redfish/v1/Chassis/System.Embedded.1/Power";
+            String powerUrl = baseUrl + "/redfish/v1/Chassis/" + chassisId + "/Power";
             Request req2 = new Request.Builder().url(powerUrl).header("Authorization", getAuth())
                 .header("Accept", "application/json").build();
             Response resp2 = client.newCall(req2).execute();
             String powerBody = resp2.body() != null ? resp2.body().string() : "{}";
+            if (!resp2.isSuccessful()) {
+                return "{\"error\":\"Power API 返回 " + resp2.code() + " (" + powerUrl + ")\"}";
+            }
             JsonObject power = gson.fromJson(powerBody, JsonObject.class);
 
             // Build summary
@@ -253,17 +291,33 @@ public class IdracApiService {
             result.add("power", power);
             return gson.toJson(result);
         } catch (Exception e) {
-            return "{\"error\":\"" + e.getMessage() + "\"}";
+            return "{\"error\":\"" + e.getMessage().replace("\"", "'") + "\"}";
         }
     }
 
     private String getSensorDataSsh() {
-        // Fallback: basic sensors via SSH
+        // iDRAC 6/7/8: racadm getsensorinfo
         StringBuilder sb = new StringBuilder();
-        SshResult r1 = runSshCommand("racadm getsensorinfo | head -40");
-        if (r1.success) sb.append(r1.output);
+        SshResult r1 = runSshCommand("racadm getsensorinfo");
+        if (r1.success && !r1.output.isEmpty()) {
+            // Truncate to avoid huge output
+            String[] lines = r1.output.split("\n");
+            int maxLines = Math.min(lines.length, 40);
+            for (int i = 0; i < maxLines; i++) sb.append(lines[i]).append("\n");
+        } else if (r1.success) {
+            sb.append("(sensorinfo 返回为空)\n");
+        }
+        if (!r1.error.isEmpty()) sb.append("\n[SSH Error: ").append(r1.error).append("]");
+
+        sb.append("\n═══ 电源信息 ═══\n");
         SshResult r2 = runSshCommand("racadm getpminfo");
-        if (r2.success) sb.append("\n===PM===\n").append(r2.output);
+        if (r2.success && !r2.output.isEmpty()) {
+            String[] lines = r2.output.split("\n");
+            int maxLines = Math.min(lines.length, 20);
+            for (int i = 0; i < maxLines; i++) sb.append(lines[i]).append("\n");
+        } else if (!r2.error.isEmpty()) {
+            sb.append("[SSH Error: ").append(r2.error).append("]");
+        }
         return sb.toString();
     }
 
@@ -282,57 +336,77 @@ public class IdracApiService {
             OkHttpClient client = getClient();
             String baseUrl = getBaseUrl();
 
+            // Auto-discover system member ID
+            String systemId = discoverMember("Systems", "System.Embedded.1");
+
             // System info
-            String sysUrl = baseUrl + "/redfish/v1/Systems/System.Embedded.1";
+            String sysUrl = baseUrl + "/redfish/v1/Systems/" + systemId;
             Request req = new Request.Builder().url(sysUrl).header("Authorization", getAuth())
                 .header("Accept", "application/json").build();
             Response resp = client.newCall(req).execute();
             String sysBody = resp.body() != null ? resp.body().string() : "{}";
+            if (!resp.isSuccessful()) {
+                return "{\"error\":\"Systems API 返回 " + resp.code() + " (" + sysUrl + ")\"}";
+            }
             JsonObject sys = gson.fromJson(sysBody, JsonObject.class);
 
+            // Try to get disk info separately
             JsonObject result = new JsonObject();
-            // CPU
-            if (sys.has("ProcessorSummary")) {
-                result.add("ProcessorSummary", sys.get("ProcessorSummary"));
+            if (sys.has("ProcessorSummary")) result.add("ProcessorSummary", sys.get("ProcessorSummary"));
+            if (sys.has("MemorySummary")) result.add("MemorySummary", sys.get("MemorySummary"));
+            if (sys.has("Model")) result.addProperty("Model", sys.get("Model").getAsString());
+            if (sys.has("Manufacturer")) result.addProperty("Manufacturer", sys.get("Manufacturer").getAsString());
+            if (sys.has("BiosVersion")) result.addProperty("BiosVersion", sys.get("BiosVersion").getAsString());
+            if (sys.has("SystemType")) result.addProperty("SystemType", sys.get("SystemType").getAsString());
+            if (sys.has("AssetTag")) result.addProperty("AssetTag", sys.get("AssetTag").getAsString());
+
+            // Try to get simple storage info
+            try {
+                String storageUrl = baseUrl + "/redfish/v1/Systems/" + systemId + "/SimpleStorage";
+                Request sReq = new Request.Builder().url(storageUrl).header("Authorization", getAuth())
+                    .header("Accept", "application/json").build();
+                Response sResp = client.newCall(sReq).execute();
+                if (sResp.isSuccessful() && sResp.body() != null) {
+                    JsonObject storage = gson.fromJson(sResp.body().string(), JsonObject.class);
+                    if (storage.has("Devices")) {
+                        result.add("StorageDevices", storage.get("Devices"));
+                        result.addProperty("StorageCount", storage.getAsJsonArray("Devices").size());
+                    }
+                }
+                if (sResp != null && sResp.body() != null) sResp.close();
+            } catch (Exception e) {
+                Log.d(TAG, "SimpleStorage not available: " + e.getMessage());
             }
-            // Memory
-            if (sys.has("MemorySummary")) {
-                result.add("MemorySummary", sys.get("MemorySummary"));
-            }
-            // Model
-            if (sys.has("Model")) {
-                result.addProperty("Model", sys.get("Model").getAsString());
-            }
-            // Manufacturer
-            if (sys.has("Manufacturer")) {
-                result.addProperty("Manufacturer", sys.get("Manufacturer").getAsString());
-            }
-            // BIOS
-            if (sys.has("BiosVersion")) {
-                result.addProperty("BiosVersion", sys.get("BiosVersion").getAsString());
-            }
+
             return gson.toJson(result);
         } catch (Exception e) {
-            return "{\"error\":\"" + e.getMessage() + "\"}";
+            return "{\"error\":\"" + e.getMessage().replace("\"", "'") + "\"}";
         }
     }
 
     private String getHardwareInfoSsh() {
         StringBuilder sb = new StringBuilder();
-        SshResult r1 = runSshCommand("racadm getsysinfo | head -30");
-        if (r1.success) sb.append(r1.output);
+        SshResult r1 = runSshCommand("racadm getsysinfo");
+        if (r1.success && !r1.output.isEmpty()) {
+            String[] lines = r1.output.split("\n");
+            int maxLines = Math.min(lines.length, 30);
+            for (int i = 0; i < maxLines; i++) sb.append(lines[i]).append("\n");
+        } else if (!r1.error.isEmpty()) {
+            sb.append("SSH Error: ").append(r1.error);
+        }
         return sb.toString();
     }
 
     private String powerControlRedfish(String action) {
         try {
+            String systemId = discoverMember("Systems", "System.Embedded.1");
             String resetType;
             switch (action) {
                 case "on": resetType = "On"; break;
                 case "off": resetType = "ForceOff"; break;
                 default: resetType = "ForceRestart";
             }
-            String url = getBaseUrl() + "/redfish/v1/Systems/System.Embedded.1/Actions/ComputerSystem.Reset";
+            String url = getBaseUrl() + "/redfish/v1/Systems/" + systemId + "/Actions/ComputerSystem.Reset";
             JsonObject json = new JsonObject();
             json.addProperty("ResetType", resetType);
             RequestBody body = RequestBody.create(gson.toJson(json), MediaType.parse("application/json"));
