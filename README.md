@@ -18,10 +18,6 @@
 - 自定义 SSH / HTTPS 端口（适配端口映射场景）
 - 保存 iDRAC 连接配置
 
-## 截图
-
-（待补充）
-
 ## 支持的 iDRAC 版本
 
 | 版本 | Redfish 模式 | SSH 模式 |
@@ -32,7 +28,7 @@
 
 ## 安装
 
-从 [Releases](https://github.com/tujiang/idrac-controller/releases) 页面下载最新 APK，在 Android 设备上安装即可。
+从 [Releases](https://github.com/tblfokb/idrac-controller/releases) 页面下载最新 APK，在 Android 设备上安装即可。
 
 最低要求：Android 4.4 (API 19)
 
