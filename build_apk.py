@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-"""手动打包 APK - iDRAC 控制器 v1.9.0 (移除优雅关机/重启+添加操作确认弹窗)"""
+"""手动打包 APK - iDRAC 控制器（自动读取版本号）"""
 
 import os
+import re
 import sys
 import subprocess
 import shutil
@@ -21,6 +22,16 @@ JAVAC = r"C:\Program Files\Java\jdk-26.0.1\bin\javac.exe"
 D8 = os.path.join(BUILD_TOOLS, "d8.bat")
 APKSIGNER = os.path.join(BUILD_TOOLS, "apksigner.bat")
 
+def get_version():
+    """从 AndroidManifest.xml 读取版本号"""
+    manifest = os.path.join(SRC_DIR, 'AndroidManifest.xml')
+    with open(manifest, 'r', encoding='utf-8') as f:
+        content = f.read()
+    version_code = re.search(r'android:versionCode="(\d+)"', content)
+    version_name = re.search(r'android:versionName="([^"]+)"', content)
+    return (version_code.group(1) if version_code else '0',
+            version_name.group(1) if version_name else 'unknown')
+
 def run(cmd, check=True, cwd=None):
     print(f">>> {cmd}")
     result = subprocess.run(cmd, shell=True, capture_output=True, cwd=cwd)
@@ -39,8 +50,9 @@ def run(cmd, check=True, cwd=None):
     return result
 
 def main():
+    version_code, version_name = get_version()
     print("=" * 50)
-    print("  iDRAC 控制器 v1.9.0 - 手动 APK 打包 (移除优雅关机/重启+添加操作确认弹窗)")
+    print(f"  iDRAC 控制器 v{version_name} - 手动 APK 打包")
     print("=" * 50)
 
     # 清理并创建输出目录
@@ -184,8 +196,8 @@ def main():
     cmd = f'"{BUILD_TOOLS}\\apksigner.bat" verify "{apk_signed}"'
     run(cmd, check=False)
 
-    # 复制到桌面
-    apk_final = os.path.join(PROJECT_DIR, "iDRAC_Controller_v1.9.0.apk")
+    # 复制到项目目录（使用动态版本号）
+    apk_final = os.path.join(PROJECT_DIR, f"iDRAC控制器_v{version_name}.apk")
     shutil.copy2(apk_signed, apk_final)
 
     print("\n" + "=" * 50)
