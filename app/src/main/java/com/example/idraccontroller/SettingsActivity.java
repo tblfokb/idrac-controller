@@ -27,8 +27,8 @@ public class SettingsActivity extends Activity {
 
         // Setup spinner
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
-            R.array.mode_array, android.R.layout.simple_spinner_item);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            R.array.mode_array, R.layout.spinner_item);
+        adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         spinnerMode.setAdapter(adapter);
 
         loadSettings();

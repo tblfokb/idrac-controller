@@ -2,93 +2,173 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="24dp">
+    android:background="@color/background"
+    android:fillViewport="true">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:gravity="center_horizontal">
+        android:gravity="center_horizontal"
+        android:padding="20dp">
 
-        <!-- 标题 -->
-        <TextView
+        <!-- ==================== 头部区域 ==================== -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="iDRAC 远程控制"
-            android:textSize="24sp"
-            android:textStyle="bold"
+            android:orientation="vertical"
             android:gravity="center"
-            android:layout_marginBottom="8dp" />
+            android:layout_marginBottom="4dp">
 
-        <!-- 连接模式指示 -->
-        <TextView
-            android:id="@+id/text_mode"
+            <!-- Logo / 标题行 -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:layout_marginBottom="4dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="🖥"
+                    android:textSize="28sp"
+                    android:layout_marginEnd="8dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="iDRAC 远程控制"
+                    android:textSize="22sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/text_primary" />
+            </LinearLayout>
+
+            <!-- 模式指示 -->
+            <TextView
+                android:id="@+id/text_mode"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="SSH（iDRAC 6/7/8）"
+                android:textSize="11sp"
+                android:textColor="@color/text_secondary"
+                android:paddingHorizontal="12dp"
+                android:paddingVertical="3dp"
+                android:layout_marginBottom="16dp" />
+        </LinearLayout>
+
+        <!-- ==================== 服务器状态卡片 ==================== -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="模式：SSH"
-            android:textSize="12sp"
-            android:textColor="#888888"
-            android:gravity="center"
-            android:layout_marginBottom="24dp" />
-
-        <!-- 状态显示 -->
-        <TextView
-            android:id="@+id/text_status"
-            android:layout_width="match_parent"
-            android:layout_height="120dp"
-            android:gravity="center"
-            android:text="点击下方按钮操作服务器"
-            android:textSize="16sp"
-            android:background="#F5F5F5"
+            android:orientation="vertical"
+            android:background="@drawable/card_bg"
             android:padding="16dp"
-            android:layout_marginBottom="32dp" />
+            android:layout_marginBottom="20dp">
 
-        <!-- 开机按钮 -->
-        <Button
-            android:id="@+id/btn_power_on"
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="📡 服务器状态"
+                style="@style/CardTitle"
+                android:layout_marginBottom="12dp" />
+
+            <TextView
+                android:id="@+id/text_status"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="点击下方按钮操作服务器"
+                android:textSize="15sp"
+                android:textColor="@color/text_secondary"
+                android:padding="12dp"
+                android:minHeight="60dp" />
+
+            <Button
+                android:id="@+id/btn_check_status"
+                android:layout_width="match_parent"
+                android:layout_height="44dp"
+                android:text="查询电源状态"
+                android:textSize="14sp"
+                android:textColor="@color/text_on_primary"
+                android:background="@drawable/btn_check"
+                android:layout_marginTop="8dp" />
+        </LinearLayout>
+
+        <!-- ==================== 电源控制卡片 ==================== -->
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="64dp"
-            android:text="开  机"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="16dp" />
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/card_bg"
+            android:padding="16dp"
+            android:layout_marginBottom="20dp">
 
-        <!-- 关机按钮 -->
-        <Button
-            android:id="@+id/btn_power_off"
-            android:layout_width="match_parent"
-            android:layout_height="64dp"
-            android:text="关  机"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="16dp" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="⚡ 电源控制"
+                style="@style/CardTitle"
+                android:layout_marginBottom="12dp" />
 
-        <!-- 重启按钮 -->
-        <Button
-            android:id="@+id/btn_power_cycle"
-            android:layout_width="match_parent"
-            android:layout_height="64dp"
-            android:text="重  启"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="24dp" />
+            <!-- 开机 / 关机 (并排) -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="12dp">
 
-        <!-- 查询状态 -->
-        <Button
-            android:id="@+id/btn_check_status"
-            android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:text="查询电源状态"
-            android:textSize="16sp"
-            android:layout_marginBottom="16dp" />
+                <Button
+                    android:id="@+id/btn_power_on"
+                    android:layout_width="0dp"
+                    android:layout_height="64dp"
+                    android:layout_weight="1"
+                    android:text="开  机"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/text_on_primary"
+                    android:background="@drawable/btn_power_on"
+                    android:layout_marginEnd="8dp" />
 
-        <!-- 设置 -->
+                <Button
+                    android:id="@+id/btn_power_off"
+                    android:layout_width="0dp"
+                    android:layout_height="64dp"
+                    android:layout_weight="1"
+                    android:text="关  机"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/text_on_primary"
+                    android:background="@drawable/btn_power_off"
+                    android:layout_marginStart="8dp" />
+            </LinearLayout>
+
+            <!-- 重启 (全宽) -->
+            <Button
+                android:id="@+id/btn_power_cycle"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:text="重  启"
+                android:textSize="17sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_on_primary"
+                android:background="@drawable/btn_restart" />
+        </LinearLayout>
+
+        <!-- ==================== 设置按钮 ==================== -->
         <Button
             android:id="@+id/btn_settings"
             android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:text="设置"
-            android:textSize="16sp" />
+            android:layout_height="48dp"
+            android:text="设  置"
+            android:textSize="15sp"
+            android:textColor="@color/text_on_primary"
+            android:background="@drawable/btn_settings" />
+
+        <!-- 底部留白 -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="16dp" />
 
     </LinearLayout>
 </ScrollView>

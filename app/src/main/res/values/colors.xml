@@ -1,7 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="primary">#1976D2</color>
-    <color name="primary_dark">#0D47A1</color>
-    <color name="accent">#FF4081</color>
-    <color name="background">#F5F5F5</color>
+    <!-- 主色调 -->
+    <color name="primary">#00BCD4</color>
+    <color name="primary_dark">#0097A7</color>
+    <color name="primary_light">#B2EBF2</color>
+
+    <!-- 背景色 -->
+    <color name="background">#0D1117</color>
+    <color name="surface">#161B22</color>
+    <color name="card_bg">#1C2333</color>
+    <color name="card_stroke">#2A3348</color>
+
+    <!-- 功能色 -->
+    <color name="success">#4CAF50</color>
+    <color name="success_dark">#388E3C</color>
+    <color name="danger">#EF5350</color>
+    <color name="danger_dark">#D32F2F</color>
+    <color name="warning">#FF9800</color>
+    <color name="warning_dark">#F57C00</color>
+    <color name="info">#42A5F5</color>
+    <color name="info_dark">#1E88E5</color>
+    <color name="secondary">#607D8B</color>
+    <color name="secondary_dark">#455A64</color>
+
+    <!-- 文字 -->
+    <color name="text_primary">#E6EDF3</color>
+    <color name="text_secondary">#8B949E</color>
+    <color name="text_hint">#484F58</color>
+    <color name="text_on_primary">#FFFFFF</color>
+
+    <!-- 输入框 -->
+    <color name="input_bg">#0D1117</color>
+    <color name="input_stroke">#30363D</color>
+    <color name="input_stroke_focus">#00BCD4</color>
+
+    <!-- 旧颜色保留兼容 -->
+    <color name="accent">#00BCD4</color>
 </resources>
