@@ -8,7 +8,7 @@
 
 ## 应用截图
 
-![主界面截图](screenshots/screenshot_main.jpg)
+![主界面截图](screenshots/screenshot_main.png)
 
 *暗色科技风主界面 - 卡片式布局，状态面板与控制面板分区显示*
 
