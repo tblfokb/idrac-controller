@@ -312,6 +312,17 @@
                 android:maxLines="20" />
         </LinearLayout>
 
+        <!-- ====== SSH 终端入口 ====== -->
+        <Button
+            android:id="@+id/btn_ssh_terminal"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:text="💻 SSH 终端"
+            android:textSize="15sp"
+            android:textColor="@color/accent"
+            android:background="@drawable/btn_settings"
+            android:layout_marginBottom="16dp" />
+
         <!-- ====== 设置入口 ====== -->
         <Button
             android:id="@+id/btn_settings"

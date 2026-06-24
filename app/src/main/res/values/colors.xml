@@ -32,4 +32,5 @@
     <color name="gradient_start">#0D1525</color>
     <color name="gradient_mid">#111B30</color>
     <color name="gradient_end">#0A0E1A</color>
+    <color name="border">#1A2744</color>
 </resources>

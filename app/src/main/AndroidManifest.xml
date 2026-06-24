@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.idraccontroller"
-    android:versionCode="15"
-    android:versionName="1.9.1">
+    android:versionCode="16"
+    android:versionName="1.9.2">
 
     <uses-permission android:name="android.permission.INTERNET" />
 
@@ -37,6 +37,10 @@
 
         <activity
             android:name=".HardwareInfoActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".SshTerminalActivity"
             android:exported="false" />
 
     </application>

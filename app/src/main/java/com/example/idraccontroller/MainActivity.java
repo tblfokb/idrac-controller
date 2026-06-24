@@ -14,7 +14,7 @@ public class MainActivity extends Activity {
     private TextView textCpuTemp, textFanSpeed, textPowerWatt;
     private TextView textHardwareSummary;
     private Button btnPowerOn, btnPowerOff, btnPowerCycle, btnCheckStatus, btnSettings;
-    private Button btnSwitchServer, btnAddServer;
+    private Button btnSwitchServer, btnAddServer, btnSshTerminal;
     private IdracApiService apiService;
 
     @Override
@@ -39,6 +39,7 @@ public class MainActivity extends Activity {
         btnSettings = findViewById(R.id.btn_settings);
         btnSwitchServer = findViewById(R.id.btn_switch_server);
         btnAddServer = findViewById(R.id.btn_add_server);
+        btnSshTerminal = findViewById(R.id.btn_ssh_terminal);
 
         updateServerDisplay();
         updateModeDisplay();
@@ -49,6 +50,8 @@ public class MainActivity extends Activity {
             if (active != null) i.putExtra("server_id", active.id);
             startActivity(i);
         });
+
+        btnSshTerminal.setOnClickListener(v -> openSshTerminal());
 
         btnAddServer.setOnClickListener(v -> {
             startActivity(new Intent(this, SettingsActivity.class));
@@ -273,5 +276,12 @@ public class MainActivity extends Activity {
             return "电源: OFF";
         }
         return "状态: " + result.output.trim();
+    }
+
+    // ========== SSH 终端 ==========
+
+    private void openSshTerminal() {
+        Intent intent = new Intent(this, SshTerminalActivity.class);
+        startActivity(intent);
     }
 }

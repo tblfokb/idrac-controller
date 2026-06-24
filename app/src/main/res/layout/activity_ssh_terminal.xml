@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@drawable/bg_gradient"
+    android:fitsSystemWindows="true">
+
+    <!-- 标题栏 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:background="#0d1321"
+        android:paddingHorizontal="16dp"
+        android:elevation="4dp">
+
+        <Button
+            android:id="@+id/btn_back"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:text="←"
+            android:textSize="18sp"
+            android:textColor="@color/accent"
+            android:background="@android:color/transparent" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="SSH 终端"
+            android:textSize="17sp"
+            android:textStyle="bold"
+            android:textColor="@color/accent"
+            android:letterSpacing="0.1"
+            android:gravity="center" />
+
+        <Button
+            android:id="@+id/btn_clear"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:text="🗑"
+            android:textSize="16sp"
+            android:background="@android:color/transparent" />
+    </LinearLayout>
+
+    <!-- 连接状态指示 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:padding="10dp"
+        android:background="#0a0e17">
+
+        <View
+            android:id="@+id/status_dot"
+            android:layout_width="8dp"
+            android:layout_height="8dp"
+            android:background="#ff5252"
+            android:layout_marginEnd="8dp" />
+
+        <TextView
+            android:id="@+id/text_connection_status"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="未连接"
+            android:textSize="12sp"
+            android:textColor="@color/text_dim" />
+
+        <Button
+            android:id="@+id/btn_connect"
+            android:layout_width="wrap_content"
+            android:layout_height="32dp"
+            android:text="连接"
+            android:textSize="12sp"
+            android:textColor="@color/accent"
+            android:background="@drawable/input_bg"
+            android:paddingHorizontal="14dp" />
+    </LinearLayout>
+
+    <!-- 终端输出区 -->
+    <ScrollView
+        android:id="@+id/scroll_output"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="#070a10"
+        android:padding="10dp"
+        android:fadeScrollbars="false"
+        android:scrollbarThumbVertical="@color/accent">
+
+        <TextView
+            android:id="@+id/text_output"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="iDRAC SSH 终端 v1.9.1\n连接后可直接输入 racadm 命令\n\n示例：\n  racadm getsysinfo\n  racadm getled\n  racadm serveraction -h\n\n"
+            android:textSize="12sp"
+            android:textColor="@color/text_primary"
+            android:fontFamily="monospace"
+            android:lineSpacingExtra="2dp" />
+    </ScrollView>
+
+    <!-- 分隔线 -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/border" />
+
+    <!-- 命令输入区 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:background="#0d1321"
+        android:padding="8dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="racadm#"
+            android:textSize="13sp"
+            android:textColor="@color/accent"
+            android:fontFamily="monospace"
+            android:layout_marginEnd="6dp" />
+
+        <EditText
+            android:id="@+id/edit_command"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="输入命令..."
+            android:textSize="13sp"
+            android:textColor="@color/text_primary"
+            android:fontFamily="monospace"
+            android:background="@null"
+            android:singleLine="true"
+            android:imeOptions="actionSend"
+            android:textColorHint="@color/text_dim" />
+
+        <Button
+            android:id="@+id/btn_send"
+            android:layout_width="48dp"
+            android:layout_height="36dp"
+            android:text="发送"
+            android:textSize="12sp"
+            android:textColor="@color/text_on_primary"
+            android:background="@drawable/btn_check"
+            android:layout_marginStart="6dp" />
+    </LinearLayout>
+
+</LinearLayout>
