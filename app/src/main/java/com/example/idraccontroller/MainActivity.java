@@ -17,6 +17,13 @@ public class MainActivity extends Activity {
     private Button btnSwitchServer, btnAddServer, btnSshTerminal;
     private IdracApiService apiService;
 
+    // 风扇调速相关
+    private SeekBar seekbarFan;
+    private TextView textFanPercent;
+    private Button btnApplyFan, btnAutoFan;
+    private TextView textFanStatus;
+    private int currentFanPercent = 50;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -40,6 +47,41 @@ public class MainActivity extends Activity {
         btnSwitchServer = findViewById(R.id.btn_switch_server);
         btnAddServer = findViewById(R.id.btn_add_server);
         btnSshTerminal = findViewById(R.id.btn_ssh_terminal);
+
+        // 风扇调速控件初始化
+        seekbarFan = findViewById(R.id.seekbar_fan);
+        textFanPercent = findViewById(R.id.text_fan_percent);
+        btnApplyFan = findViewById(R.id.btn_apply_fan);
+        btnAutoFan = findViewById(R.id.btn_auto_fan);
+        textFanStatus = findViewById(R.id.text_fan_status);
+
+        // 风扇调速拖动条监听
+        seekbarFan.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                currentFanPercent = progress;
+                textFanPercent.setText(progress + "%");
+                // 根据百分比给出建议
+                if (progress < 20) {
+                    textFanStatus.setText("⚠️ 转速较低，注意散热");
+                    textFanStatus.setTextColor(getResources().getColor(R.color.warning));
+                } else if (progress > 80) {
+                    textFanStatus.setText("⚠️ 转速较高，噪音和功耗增加");
+                    textFanStatus.setTextColor(getResources().getColor(R.color.warning));
+                } else {
+                    textFanStatus.setText("✅ 推荐转速范围");
+                    textFanStatus.setTextColor(getResources().getColor(R.color.text_dim));
+                }
+            }
+            @Override public void onStartTrackingTouch(SeekBar seekBar) {}
+            @Override public void onStopTrackingTouch(SeekBar seekBar) {}
+        });
+
+        // 应用风扇转速按钮
+        btnApplyFan.setOnClickListener(v -> applyFanSpeed());
+
+        // 恢复自动调速按钮
+        btnAutoFan.setOnClickListener(v -> setFanAuto());
 
         updateServerDisplay();
         updateModeDisplay();
@@ -283,5 +325,87 @@ public class MainActivity extends Activity {
     private void openSshTerminal() {
         Intent intent = new Intent(this, SshTerminalActivity.class);
         startActivity(intent);
+    }
+
+    // ========== 风扇调速 ==========
+
+    /**
+     * 应用风扇转速设置
+     */
+    private void applyFanSpeed() {
+        if (!Prefs.isConfigured(this)) {
+            Toast.makeText(this, "请先设置 iDRAC 连接信息", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // 确认对话框
+        new AlertDialog.Builder(this)
+            .setTitle("🌪 确认调速")
+            .setMessage("确定要将风扇转速设置为 " + currentFanPercent + "% 吗？\n\n" +
+                        "⚠️ 过低可能导致过热！\n" +
+                        "⚠️ 过高会增加噪音和功耗！")
+            .setPositiveButton("确定", (dialog, which) -> {
+                textFanStatus.setText("正在设置风扇转速...");
+                textFanStatus.setTextColor(getResources().getColor(R.color.text_dim));
+                btnApplyFan.setEnabled(false);
+                btnAutoFan.setEnabled(false);
+
+                new Thread(() -> {
+                    final String result = apiService.setFanSpeed(currentFanPercent);
+                    runOnUiThread(() -> {
+                        textFanStatus.setText(result);
+                        if (result.contains("✅")) {
+                            textFanStatus.setTextColor(getResources().getColor(R.color.green));
+                        } else {
+                            textFanStatus.setTextColor(getResources().getColor(R.color.warning));
+                        }
+                        btnApplyFan.setEnabled(true);
+                        btnAutoFan.setEnabled(true);
+                        Toast.makeText(MainActivity.this, result, Toast.LENGTH_SHORT).show();
+                    });
+                }).start();
+            })
+            .setNegativeButton("取消", null)
+            .setIcon(android.R.drawable.ic_dialog_alert)
+            .show();
+    }
+
+    /**
+     * 恢复风扇自动调速
+     */
+    private void setFanAuto() {
+        if (!Prefs.isConfigured(this)) {
+            Toast.makeText(this, "请先设置 iDRAC 连接信息", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        new AlertDialog.Builder(this)
+            .setTitle("🔄 恢复自动调速")
+            .setMessage("确定要恢复风扇自动调速吗？\n\n系统将根据温度自动调节风扇转速。")
+            .setPositiveButton("确定", (dialog, which) -> {
+                textFanStatus.setText("正在恢复自动调速...");
+                textFanStatus.setTextColor(getResources().getColor(R.color.text_dim));
+                btnApplyFan.setEnabled(false);
+                btnAutoFan.setEnabled(false);
+
+                new Thread(() -> {
+                    final String result = apiService.setFanAuto();
+                    runOnUiThread(() -> {
+                        textFanStatus.setText(result);
+                        if (result.contains("✅")) {
+                            textFanStatus.setTextColor(getResources().getColor(R.color.green));
+                            // 恢复自动后，将滑块重置为50%
+                            seekbarFan.setProgress(50);
+                        } else {
+                            textFanStatus.setTextColor(getResources().getColor(R.color.warning));
+                        }
+                        btnApplyFan.setEnabled(true);
+                        btnAutoFan.setEnabled(true);
+                        Toast.makeText(MainActivity.this, result, Toast.LENGTH_SHORT).show();
+                    });
+                }).start();
+            })
+            .setNegativeButton("取消", null)
+            .show();
     }
 }

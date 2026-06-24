@@ -279,6 +279,103 @@
             </LinearLayout>
         </LinearLayout>
 
+        <!-- ====== 风扇调速卡片 ====== -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/card_bg"
+            android:padding="18dp"
+            android:layout_marginBottom="16dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="🌪 风扇调速"
+                style="@style/CardTitle"
+                android:layout_marginBottom="14dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="12dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="转速: "
+                    android:textSize="14sp"
+                    android:textColor="@color/text_secondary" />
+
+                <TextView
+                    android:id="@+id/text_fan_percent"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="50%"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/accent" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text=" (推荐: 30-70%)"
+                    android:textSize="11sp"
+                    android:textColor="@color/text_dim" />
+            </LinearLayout>
+
+            <SeekBar
+                android:id="@+id/seekbar_fan"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:max="100"
+                android:progress="50"
+                android:progressTint="@color/accent"
+                android:thumbTint="@color/accent"
+                android:layout_marginBottom="16dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btn_apply_fan"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:text="✅ 应 用"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/text_on_primary"
+                    android:background="@drawable/btn_power_on"
+                    android:layout_marginEnd="8dp" />
+
+                <Button
+                    android:id="@+id/btn_auto_fan"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:text="🔄 恢复自动"
+                    android:textSize="14sp"
+                    android:textColor="@color/accent"
+                    android:background="@drawable/btn_settings"
+                    android:layout_marginStart="8dp" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/text_fan_status"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="拖动滑块调整转速，点击应用生效"
+                android:textSize="11sp"
+                android:textColor="@color/text_dim"
+                android:gravity="center"
+                android:layout_marginTop="10dp" />
+        </LinearLayout>
+
         <!-- ====== 硬件信息卡片 ====== -->
         <LinearLayout
             android:layout_width="match_parent"

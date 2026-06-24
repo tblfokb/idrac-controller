@@ -497,6 +497,71 @@ public class IdracApiService {
         return sysInfo;
     }
 
+    // ===================== 风扇控制 =====================
+
+    /**
+     * 设置风扇转速百分比（手动模式）
+     * @param percentage 转速百分比 (0-100)
+     * @return 操作结果
+     */
+    public String setFanSpeed(int percentage) {
+        if (percentage < 0) percentage = 0;
+        if (percentage > 100) percentage = 100;
+
+        // 先启用手动风扇控制，再设置转速
+        SshResult r1 = runSshCommand("set system.thermalsetting.FanSpeedOverride 1");
+        SshResult r2 = runSshCommand("set system.thermalsetting.FanSpeedOffset " + percentage);
+
+        if (r2.hasData()) {
+            String out = r2.output.toLowerCase();
+            if (out.contains("success") || out.contains("ok") || out.contains("object")) {
+                return "✅ 风扇转速已设置为 " + percentage + "%";
+            }
+            return "结果: " + r2.output.trim();
+        }
+        if (r2.error != null && !r2.error.isEmpty()) {
+            return "❌ 设置失败: " + r2.error;
+        }
+        return "✅ 指令已发送（" + percentage + "%)";
+    }
+
+    /**
+     * 恢复风扇自动调速
+     * @return 操作结果
+     */
+    public String setFanAuto() {
+        SshResult r = runSshCommand("set system.thermalsetting.FanSpeedOverride 0");
+        if (r.hasData()) {
+            String out = r.output.toLowerCase();
+            if (out.contains("success") || out.contains("ok") || out.contains("object")) {
+                return "✅ 已恢复风扇自动调速";
+            }
+            return "结果: " + r.output.trim();
+        }
+        if (r.error != null && !r.error.isEmpty()) {
+            return "❌ 操作失败: " + r.error;
+        }
+        return "✅ 已恢复自动调速";
+    }
+
+    /**
+     * 获取当前风扇控制模式
+     * @return 当前模式描述
+     */
+    public String getFanMode() {
+        SshResult r = runSshCommand("get system.thermalsetting.FanSpeedOverride");
+        if (r.hasData()) {
+            String out = r.output.toLowerCase();
+            if (out.contains("0") || out.contains("auto")) {
+                return "当前模式: 自动调速";
+            } else if (out.contains("1") || out.contains("manual")) {
+                return "当前模式: 手动调速";
+            }
+            return "当前设置: " + r.output.trim();
+        }
+        return "未知";
+    }
+
     static class SshResult {
         String output;
         String error;
