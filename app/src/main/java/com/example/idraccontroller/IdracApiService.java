@@ -33,6 +33,7 @@ public class IdracApiService {
     /**
      * 一次 SSH 会话执行多条命令（性能优化）。
      * 使用 ChannelShell 按顺序发送命令，分别收集输出。
+     * 优化：更快检测命令结束（检测提示符 + 缩短超时）
      */
     private SshResult[] runSshCommandsInOneSession(String... commands) {
         Session session = null;
@@ -52,16 +53,23 @@ public class IdracApiService {
             OutputStream out = channel.getOutputStream();
             channel.connect();
 
-            // 读取 banner，最多等 2 秒
+            // 读取 banner，最多等 1.5 秒（优化：从 2 秒缩短）
             StringBuilder allOutput = new StringBuilder();
-            long deadline = System.currentTimeMillis() + 2000;
+            long deadline = System.currentTimeMillis() + 1500;
             while (System.currentTimeMillis() < deadline) {
                 if (in.available() > 0) {
                     byte[] buf = new byte[8192];
                     int n = in.read(buf);
-                    if (n > 0) allOutput.append(new String(buf, 0, n, "UTF-8"));
+                    if (n > 0) {
+                        String chunk = new String(buf, 0, n, "UTF-8");
+                        allOutput.append(chunk);
+                        // 优化：如果已读取到提示符，提前结束
+                        if (chunk.contains("racadm >>") || chunk.contains("iDRAC>") || chunk.contains("->")) {
+                            break;
+                        }
+                    }
                 } else {
-                    Thread.sleep(100);
+                    Thread.sleep(80); // 优化：从 100ms 缩短到 80ms
                 }
             }
 
@@ -72,9 +80,9 @@ public class IdracApiService {
                 out.write(("racadm " + cmd + "\n").getBytes("UTF-8"));
                 out.flush();
 
-                // 等待输出，最多 10 秒，3 秒无新数据则结束
+                // 等待输出，最多 8 秒（优化：从 10 秒缩短），2.5 秒无新数据则结束
                 long lastData = System.currentTimeMillis();
-                long cmdDeadline = System.currentTimeMillis() + 10000;
+                long cmdDeadline = System.currentTimeMillis() + 8000;
                 StringBuilder cmdOutput = new StringBuilder();
                 boolean gotPrompt = false;
 
@@ -86,10 +94,19 @@ public class IdracApiService {
                             String chunk = new String(buf, 0, n, "UTF-8");
                             cmdOutput.append(chunk);
                             lastData = System.currentTimeMillis();
+
+                            // 优化：检测提示符，提前结束等待
+                            if (chunk.contains("racadm >>") || chunk.contains("iDRAC>") ||
+                                (chunk.contains("->") && chunk.contains("admin"))) {
+                                gotPrompt = true;
+                                // 优化：再等 200ms 确保输出完整
+                                Thread.sleep(200);
+                                break;
+                            }
                         }
                     } else {
-                        Thread.sleep(100);
-                        if (System.currentTimeMillis() - lastData > 3000) break;
+                        Thread.sleep(80); // 优化：从 100ms 缩短到 80ms
+                        if (System.currentTimeMillis() - lastData > 2500) break; // 优化：从 3 秒缩短到 2.5 秒
                     }
                 }
 
@@ -236,8 +253,9 @@ public class IdracApiService {
         session.setPassword(pwd);
         session.setConfig("StrictHostKeyChecking", "no");
         session.setConfig("PreferredAuthentications", "password,keyboard-interactive");
-        session.setTimeout(15000);
-        session.connect(15000);
+        // 优化：缩短超时时间（15秒 → 10秒）
+        session.setTimeout(10000);
+        session.connect(10000);
         return session;
     }
 
@@ -283,11 +301,12 @@ public class IdracApiService {
      * 返回数组：[0]=电源状态, [1]=传感器数据, [2]=硬件信息, [3]=CPU信息, [4]=内存信息
      * 优化：只发3条命令（CPU/内存信息已包含在 getsysinfo 输出中）
      * 优化：30秒缓存避免重复SSH连接
+     * @param forceRefresh 是否强制刷新（true=跳过缓存，false=使用缓存）
      */
-    public SshResult[] getAllInfo() {
+    public SshResult[] getAllInfo(boolean forceRefresh) {
         long now = System.currentTimeMillis();
         // 缓存命中：30秒内直接返回上次结果（避免重复SSH连接）
-        if (lastAllInfoResults != null && (now - lastAllInfoTime) < CACHE_TTL) {
+        if (!forceRefresh && lastAllInfoResults != null && (now - lastAllInfoTime) < CACHE_TTL) {
             return lastAllInfoResults;
         }
         // 一次SSH会话发3条命令（不是5条）
@@ -312,6 +331,21 @@ public class IdracApiService {
         lastAllInfoResults = fullResults;
         lastAllInfoTime = now;
         return fullResults;
+    }
+
+    /**
+     * 重载：默认使用缓存
+     */
+    public SshResult[] getAllInfo() {
+        return getAllInfo(false);
+    }
+
+    /**
+     * 清除缓存（在电源操作后调用，确保下次查询获取最新状态）
+     */
+    public static void clearCache() {
+        lastAllInfoResults = null;
+        lastAllInfoTime = 0;
     }
 
     /** 一次 SSH 会话同时获取传感器 + 硬件信息（性能优化） */

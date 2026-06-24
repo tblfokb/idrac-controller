@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.method.ScrollingMovementMethod;
+import android.util.Log;
 import android.widget.*;
 import java.util.List;
 
@@ -75,12 +76,19 @@ public class MainActivity extends Activity {
 
     /**
      * Activity 恢复时调用：刷新服务器显示和连接模式
+     * 优化：如果配置完整且缓存过期，自动刷新状态
      */
     @Override
     protected void onResume() {
         super.onResume();
         updateServerDisplay();
         updateModeDisplay();
+
+        // 优化：如果配置完整，检查缓存是否需要刷新
+        if (Prefs.isConfigured(this)) {
+            // 不强制刷新，使用缓存（如果缓存有效）
+            checkStatusInternal(false);
+        }
     }
 
     /**
@@ -158,6 +166,8 @@ public class MainActivity extends Activity {
         setPowerButtons(false);
         new Thread(() -> {
             final String result = apiService.powerControl(action);
+            // 优化：电源操作后清除缓存，确保下次查询获取最新状态
+            IdracApiService.clearCache();
             runOnUiThread(() -> {
                 textStatus.setText(result);
                 Toast.makeText(MainActivity.this, result, Toast.LENGTH_SHORT).show();
@@ -199,60 +209,90 @@ public class MainActivity extends Activity {
     }
 
     /**
-     * 查询服务器状态：一次性获取电源状态 + 传感器信息 + 硬件信息 + CPU信息 + 内存信息（性能优化）
+     * 查询服务器状态：强制刷新（按钮点击时调用）
      */
     private void checkStatus() {
+        checkStatusInternal(true);
+    }
+
+    /**
+     * 查询服务器状态（内部方法）
+     * @param forceRefresh 是否强制刷新（true=跳过缓存，false=使用缓存）
+     */
+    private void checkStatusInternal(boolean forceRefresh) {
+        Log.d("iDRAC", "checkStatusInternal called, forceRefresh=" + forceRefresh);
         if (!Prefs.isConfigured(this)) {
+            Log.w("iDRAC", "Prefs not configured, showing toast");
             Toast.makeText(this, "请先设置 iDRAC 连接信息", Toast.LENGTH_SHORT).show();
             return;
         }
-        textStatus.setText("查询中...");
-        textCpuTemp.setText("...");
-        textFanSpeed.setText("...");
-        textPowerWatt.setText("...");
-        textHardwareSummary.setText("获取中...");
+        Log.d("iDRAC", "Prefs configured, ip=" + Prefs.getIpAddress(this));
+
+        // 优化：如果是强制刷新，显示"查询中..."；否则不显示（使用缓存时很快）
+        if (forceRefresh) {
+            textStatus.setText("查询中...");
+            textCpuTemp.setText("...");
+            textFanSpeed.setText("...");
+            textPowerWatt.setText("...");
+            textHardwareSummary.setText("获取中...");
+        }
         setPowerButtons(false);
+        Log.d("iDRAC", "Buttons disabled, starting SSH thread");
 
         new Thread(() -> {
-            // 一次SSH会话获取所有信息（电源状态+传感器+硬件信息+CPU+内存）
-            IdracApiService.SshResult[] results = apiService.getAllInfo();
+            try {
+                Log.d("iDRAC", "SSH thread started, calling getAllInfo");
+                // 获取所有信息（根据 forceRefresh 参数决定是否使用缓存）
+                IdracApiService.SshResult[] results = apiService.getAllInfo(forceRefresh);
+                Log.d("iDRAC", "getAllInfo returned, results length=" + results.length);
 
-            final String powerStatus = parsePowerStatus(results[0]);
-            final String sensorData = results[1].hasData() ? results[1].output : null;
-            final String hardwareData = results[2].hasData() ? results[2].output : null;
-            final String cpuData = results[3].hasData() ? results[3].output : null;
-            final String memoryData = results[4].hasData() ? results[4].output : null;
+                final String powerStatus = parsePowerStatus(results[0]);
+                final String sensorData = results[1].hasData() ? results[1].output : null;
+                final String hardwareData = results[2].hasData() ? results[2].output : null;
+                final String cpuData = results[3].hasData() ? results[3].output : null;
+                final String memoryData = results[4].hasData() ? results[4].output : null;
 
-            // 合并硬件信息、CPU信息和内存信息
-            final String combinedHardwareInfo = combineHardwareInfo(hardwareData, cpuData, memoryData);
+                // 合并硬件信息、CPU信息和内存信息
+                final String combinedHardwareInfo = combineHardwareInfo(hardwareData, cpuData, memoryData);
+                Log.d("iDRAC", "Parsed results, powerStatus=" + powerStatus);
 
-            runOnUiThread(() -> {
-                // 电源状态
-                textStatus.setText(powerStatus);
+                runOnUiThread(() -> {
+                    Log.d("iDRAC", "Updating UI on UI thread");
+                    // 电源状态
+                    textStatus.setText(powerStatus);
 
-                // 传感器数据
-                if (sensorData == null || sensorData.startsWith("获取失败") || sensorData.startsWith("SSH错误")) {
-                    textCpuTemp.setText("ERR");
-                    textFanSpeed.setText("ERR");
-                    textPowerWatt.setText("ERR");
-                } else {
-                    textCpuTemp.setText(IdracApiService.parseCpuTemp(sensorData));
-                    textFanSpeed.setText(IdracApiService.parseFanSpeed(sensorData));
-                    textPowerWatt.setText(IdracApiService.parsePowerWatt(sensorData));
-                }
+                    // 传感器数据
+                    if (sensorData == null || sensorData.startsWith("获取失败") || sensorData.startsWith("SSH错误")) {
+                        textCpuTemp.setText("ERR");
+                        textFanSpeed.setText("ERR");
+                        textPowerWatt.setText("ERR");
+                    } else {
+                        textCpuTemp.setText(IdracApiService.parseCpuTemp(sensorData));
+                        textFanSpeed.setText(IdracApiService.parseFanSpeed(sensorData));
+                        textPowerWatt.setText(IdracApiService.parsePowerWatt(sensorData));
+                    }
 
-                // 硬件信息（包含CPU和内存信息）
-                if (combinedHardwareInfo == null || combinedHardwareInfo.isEmpty()) {
-                    textHardwareSummary.setText("获取失败:\n无数据");
-                } else if (combinedHardwareInfo.startsWith("获取失败") || combinedHardwareInfo.startsWith("SSH错误")) {
-                    textHardwareSummary.setText(combinedHardwareInfo);
-                } else {
-                    String summary = IdracApiService.parseHardwareSummary(combinedHardwareInfo);
-                    textHardwareSummary.setText(summary);
-                }
+                    // 硬件信息（包含CPU和内存信息）
+                    if (combinedHardwareInfo == null || combinedHardwareInfo.isEmpty()) {
+                        textHardwareSummary.setText("获取失败:\n无数据");
+                    } else if (combinedHardwareInfo.startsWith("获取失败") || combinedHardwareInfo.startsWith("SSH错误")) {
+                        textHardwareSummary.setText(combinedHardwareInfo);
+                    } else {
+                        String summary = IdracApiService.parseHardwareSummary(combinedHardwareInfo);
+                        textHardwareSummary.setText(summary);
+                    }
 
-                setPowerButtons(true);
-            });
+                    setPowerButtons(true);
+                    Log.d("iDRAC", "UI updated, buttons re-enabled");
+                });
+            } catch (Exception e) {
+                Log.e("iDRAC", "Exception in SSH thread", e);
+                runOnUiThread(() -> {
+                    textStatus.setText("查询异常: " + e.getMessage());
+                    setPowerButtons(true);
+                    Toast.makeText(MainActivity.this, "查询失败: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                });
+            }
         }).start();
     }
 

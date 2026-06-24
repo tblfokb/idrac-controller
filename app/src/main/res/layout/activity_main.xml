@@ -64,7 +64,7 @@
             android:orientation="horizontal"
             android:gravity="center_vertical"
             android:background="@drawable/card_bg"
-            android:padding="14dp"
+            android:padding="12dp"
             android:layout_marginBottom="16dp">
 
             <TextView
@@ -72,7 +72,7 @@
                 android:layout_height="wrap_content"
                 android:text="🖥"
                 android:textSize="20sp"
-                android:layout_marginEnd="10dp" />
+                android:layout_marginEnd="8dp" />
 
             <TextView
                 android:id="@+id/text_server_name"
@@ -82,26 +82,40 @@
                 android:text="默认服务器"
                 android:textSize="14sp"
                 android:textColor="@color/text_primary"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:maxLines="1"
+                android:ellipsize="end" />
 
-            <Button
-                android:id="@+id/btn_switch_server"
-                android:layout_width="48dp"
-                android:layout_height="36dp"
-                android:text="切换"
-                android:textSize="11sp"
-                android:textColor="@color/accent"
-                android:background="@drawable/input_bg" />
+            <!-- 按钮容器：wrap_content 不被压缩 -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginStart="8dp">
 
-            <Button
-                android:id="@+id/btn_add_server"
-                android:layout_width="48dp"
-                android:layout_height="36dp"
-                android:text="添加"
-                android:textSize="11sp"
-                android:textColor="@color/accent"
-                android:background="@drawable/input_bg"
-                android:layout_marginStart="8dp" />
+                <Button
+                    android:id="@+id/btn_switch_server"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:minWidth="0dp"
+                    android:text="切换"
+                    android:textSize="13sp"
+                    android:textColor="@color/accent"
+                    android:background="@drawable/btn_bg"
+                    android:paddingHorizontal="12dp"
+                    android:layout_marginEnd="6dp" />
+
+                <Button
+                    android:id="@+id/btn_add_server"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:minWidth="0dp"
+                    android:text="添加"
+                    android:textSize="13sp"
+                    android:textColor="@color/accent"
+                    android:background="@drawable/btn_bg"
+                    android:paddingHorizontal="12dp" />
+            </LinearLayout>
         </LinearLayout>
 
         <!-- ====== 服务器状态卡片 ====== -->
