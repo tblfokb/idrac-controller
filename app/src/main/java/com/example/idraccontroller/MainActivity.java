@@ -20,7 +20,7 @@ public class MainActivity extends Activity {
     // 风扇调速相关
     private SeekBar seekbarFan;
     private TextView textFanPercent;
-    private Button btnApplyFan, btnAutoFan;
+    private Button btnApplyFan, btnAutoFan, btnGetFanStatus;
     private TextView textFanStatus;
     private int currentFanPercent = 50;
 
@@ -53,6 +53,7 @@ public class MainActivity extends Activity {
         textFanPercent = findViewById(R.id.text_fan_percent);
         btnApplyFan = findViewById(R.id.btn_apply_fan);
         btnAutoFan = findViewById(R.id.btn_auto_fan);
+        btnGetFanStatus = findViewById(R.id.btn_get_fan_status);
         textFanStatus = findViewById(R.id.text_fan_status);
 
         // 风扇调速拖动条监听
@@ -64,10 +65,10 @@ public class MainActivity extends Activity {
                 // 根据百分比给出建议
                 if (progress < 20) {
                     textFanStatus.setText("⚠️ 转速较低，注意散热");
-                    textFanStatus.setTextColor(getResources().getColor(R.color.warning));
+                    textFanStatus.setTextColor(getResources().getColor(R.color.orange));
                 } else if (progress > 80) {
                     textFanStatus.setText("⚠️ 转速较高，噪音和功耗增加");
-                    textFanStatus.setTextColor(getResources().getColor(R.color.warning));
+                    textFanStatus.setTextColor(getResources().getColor(R.color.orange));
                 } else {
                     textFanStatus.setText("✅ 推荐转速范围");
                     textFanStatus.setTextColor(getResources().getColor(R.color.text_dim));
@@ -82,6 +83,9 @@ public class MainActivity extends Activity {
 
         // 恢复自动调速按钮
         btnAutoFan.setOnClickListener(v -> setFanAuto());
+
+        // 获取当前风扇状态按钮
+        btnGetFanStatus.setOnClickListener(v -> getFanStatus());
 
         updateServerDisplay();
         updateModeDisplay();
@@ -357,7 +361,7 @@ public class MainActivity extends Activity {
                         if (result.contains("✅")) {
                             textFanStatus.setTextColor(getResources().getColor(R.color.green));
                         } else {
-                            textFanStatus.setTextColor(getResources().getColor(R.color.warning));
+                            textFanStatus.setTextColor(getResources().getColor(R.color.orange));
                         }
                         btnApplyFan.setEnabled(true);
                         btnAutoFan.setEnabled(true);
@@ -397,7 +401,7 @@ public class MainActivity extends Activity {
                             // 恢复自动后，将滑块重置为50%
                             seekbarFan.setProgress(50);
                         } else {
-                            textFanStatus.setTextColor(getResources().getColor(R.color.warning));
+                            textFanStatus.setTextColor(getResources().getColor(R.color.orange));
                         }
                         btnApplyFan.setEnabled(true);
                         btnAutoFan.setEnabled(true);
@@ -407,5 +411,35 @@ public class MainActivity extends Activity {
             })
             .setNegativeButton("取消", null)
             .show();
+    }
+
+    /**
+     * 获取当前风扇状态
+     */
+    private void getFanStatus() {
+        if (!Prefs.isConfigured(this)) {
+            Toast.makeText(this, "请先设置 iDRAC 连接信息", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        textFanStatus.setText("正在获取风扇状态...");
+        textFanStatus.setTextColor(getResources().getColor(R.color.text_dim));
+        btnGetFanStatus.setEnabled(false);
+
+        new Thread(() -> {
+            final String mode = apiService.getFanMode();
+            runOnUiThread(() -> {
+                textFanStatus.setText(mode);
+                if (mode.contains("自动")) {
+                    textFanStatus.setTextColor(getResources().getColor(R.color.green));
+                } else if (mode.contains("手动")) {
+                    textFanStatus.setTextColor(getResources().getColor(R.color.orange));
+                } else {
+                    textFanStatus.setTextColor(getResources().getColor(R.color.orange));
+                }
+                btnGetFanStatus.setEnabled(true);
+                Toast.makeText(MainActivity.this, mode, Toast.LENGTH_SHORT).show();
+            });
+        }).start();
     }
 }

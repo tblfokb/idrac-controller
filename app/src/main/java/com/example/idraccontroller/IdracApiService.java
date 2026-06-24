@@ -508,8 +508,13 @@ public class IdracApiService {
         if (percentage < 0) percentage = 0;
         if (percentage > 100) percentage = 100;
 
-        // 先启用手动风扇控制，再设置转速
+        // 先启用手动风扇控制
         SshResult r1 = runSshCommand("set system.thermalsetting.FanSpeedOverride 1");
+        if (r1.error != null && !r1.error.isEmpty() && !r1.hasData()) {
+            return "❌ 启用手动控制失败: " + r1.error;
+        }
+
+        // 再设置转速
         SshResult r2 = runSshCommand("set system.thermalsetting.FanSpeedOffset " + percentage);
 
         if (r2.hasData()) {
