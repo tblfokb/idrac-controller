@@ -7,4 +7,5 @@ C:\Users\huc_o\WorkBuddy\Claw\app\src\main\java\com\example\idraccontroller\Sens
 C:\Users\huc_o\WorkBuddy\Claw\app\src\main\java\com\example\idraccontroller\ServerConfig.java
 C:\Users\huc_o\WorkBuddy\Claw\app\src\main\java\com\example\idraccontroller\ServerManager.java
 C:\Users\huc_o\WorkBuddy\Claw\app\src\main\java\com\example\idraccontroller\SettingsActivity.java
+C:\Users\huc_o\WorkBuddy\Claw\app\src\main\java\com\example\idraccontroller\SshTerminalActivity.java
 C:\Users\huc_o\WorkBuddy\Claw\out\gen\com\example\idraccontroller\R.java

@@ -286,7 +286,9 @@ public class IdracApiService {
                 sb.append(trimmed).append("\n");
             }
         }
-        return sb.toString().trim();
+        String result = sb.toString().trim();
+        android.util.Log.d("iDRAC_API", "cleanShellOutput(" + command + "): raw len=" + raw.length() + " cleaned len=" + result.length());
+        return result;
     }
 
     // ===================== 公开接口 =====================
@@ -299,7 +301,7 @@ public class IdracApiService {
     /**
      * 一次 SSH 会话同时获取：电源状态 + 传感器 + 硬件信息（性能优化）
      * 返回数组：[0]=电源状态, [1]=传感器数据, [2]=硬件信息, [3]=CPU信息, [4]=内存信息
-     * 优化：只发3条命令（CPU/内存信息已包含在 getsysinfo 输出中）
+     * 优化：只发2条命令（电源状态从 getsysinfo 输出中解析，避免单独查询）
      * 优化：30秒缓存避免重复SSH连接
      * @param forceRefresh 是否强制刷新（true=跳过缓存，false=使用缓存）
      */
@@ -309,28 +311,103 @@ public class IdracApiService {
         if (!forceRefresh && lastAllInfoResults != null && (now - lastAllInfoTime) < CACHE_TTL) {
             return lastAllInfoResults;
         }
-        // 一次SSH会话发3条命令（不是5条）
+        // 一次SSH会话发2条命令（电源状态从 getsysinfo 中解析，不需要单独查询）
         SshResult[] results = runSshCommandsInOneSession(
-            "serveraction powerstatus",
             "getsensorinfo",
             "getsysinfo"
         );
         // 如果某条命令失败，单独重试一次
-        if (!results[0].hasData()) results[0] = runSshCommand("serveraction powerstatus");
-        if (!results[1].hasData()) results[1] = runSshCommand("getsensorinfo");
-        if (!results[2].hasData()) results[2] = runSshCommand("getsysinfo");
-        // CPU和内存信息已包含在 getsysinfo 输出中，直接复用（避免数组越界）
+        if (!results[0].hasData()) results[0] = runSshCommand("getsensorinfo");
+        if (!results[1].hasData()) results[1] = runSshCommand("getsysinfo");
+        // 从 getsysinfo 输出中解析电源状态（不再单独发 serveraction powerstatus 命令）
+        String powerStatus = parsePowerStatusFromSysInfo(results[1].hasData() ? results[1].output : null);
+        // 如果解析失败，尝试从 getsensorinfo 输出中解析（通过功耗判断）
+        if (powerStatus.startsWith("查询失败")) {
+            android.util.Log.w("iDRAC_API", "parsePowerStatusFromSysInfo failed, trying parsePowerStatusFromSensorInfo");
+            powerStatus = parsePowerStatusFromSensorInfo(results[0].hasData() ? results[0].output : null);
+        }
+        SshResult powerResult = new SshResult(powerStatus, powerStatus.startsWith("查询失败") ? powerStatus : null);
         // 创建长度为5的数组，兼容 MainActivity 的访问方式
+        // [0]=电源状态, [1]=传感器数据, [2]=硬件信息, [3]=CPU信息, [4]=内存信息
         SshResult[] fullResults = new SshResult[5];
-        fullResults[0] = results[0];
-        fullResults[1] = results[1];
-        fullResults[2] = results[2];
-        fullResults[3] = results[2]; // CPU信息（从硬件信息中解析）
-        fullResults[4] = results[2]; // 内存信息（从硬件信息中解析）
+        fullResults[0] = powerResult;
+        fullResults[1] = results[0];
+        fullResults[2] = results[1];
+        fullResults[3] = results[1]; // CPU信息（从硬件信息中解析）
+        fullResults[4] = results[1]; // 内存信息（从硬件信息中解析）
         // 更新缓存
         lastAllInfoResults = fullResults;
         lastAllInfoTime = now;
         return fullResults;
+    }
+
+    /**
+     * 从 getsysinfo 输出中解析电源状态（避免单独发 serveraction powerstatus 命令）
+     * getsysinfo 输出中包含 "Power Status = ON/OFF" 字段
+     */
+    private static String parsePowerStatusFromSysInfo(String sysInfo) {
+        if (sysInfo == null || sysInfo.isEmpty()) {
+            android.util.Log.e("iDRAC_API", "parsePowerStatusFromSysInfo: sysInfo is null or empty");
+            return "查询失败: 无数据";
+        }
+        android.util.Log.d("iDRAC_API", "parsePowerStatusFromSysInfo: sysInfo length=" + sysInfo.length());
+        String[] lines = sysInfo.split("\n");
+        android.util.Log.d("iDRAC_API", "parsePowerStatusFromSysInfo: " + lines.length + " lines");
+        for (String line : lines) {
+            android.util.Log.d("iDRAC_API", "parsePowerStatusFromSysInfo: line=[" + line + "]");
+            // 方式1: 键值对格式 "Power Status = ON" 或 "Server Power State = ON"
+            if (line.contains("=")) {
+                String[] parts = line.split("=", 2);
+                if (parts.length == 2) {
+                    String key = parts[0].trim().toLowerCase();
+                    String val = parts[1].trim();
+                    if (key.contains("power") && key.contains("status")) {
+                        String status = val.toLowerCase();
+                        android.util.Log.d("iDRAC_API", "parsePowerStatusFromSysInfo: found power status, val=" + val);
+                        if (status.contains("on")) return "电源: ON";
+                        if (status.contains("off")) return "电源: OFF";
+                        return "电源: " + val;
+                    }
+                }
+            }
+            // 方式2: 直接包含 "Power: ON" 或 "Power ON" 格式
+            String lower = line.toLowerCase();
+            if (lower.contains("power") && (lower.contains("on") || lower.contains("off"))) {
+                android.util.Log.d("iDRAC_API", "parsePowerStatusFromSysInfo: found power in line, line=" + line);
+                if (lower.contains("on")) return "电源: ON";
+                if (lower.contains("off")) return "电源: OFF";
+            }
+            // 方式3: 检查 "Server Power State" 或 "System Power State"
+            if (lower.contains("server power") || lower.contains("system power")) {
+                if (lower.contains("on")) return "电源: ON";
+                if (lower.contains("off")) return "电源: OFF";
+            }
+        }
+        android.util.Log.e("iDRAC_API", "parsePowerStatusFromSysInfo: failed to parse, sysInfo=" + sysInfo);
+        return "查询失败: 无法解析电源状态";
+    }
+    
+    /**
+     * 从 getsensorinfo 输出中判断电源状态（备用方案）
+     * 如果电源功耗 > 0，说明服务器已开机
+     */
+    private static String parsePowerStatusFromSensorInfo(String sensorData) {
+        if (sensorData == null || sensorData.isEmpty()) {
+            return "查询失败: 无传感器数据";
+        }
+        String[] lines = sensorData.split("\n");
+        for (String line : lines) {
+            if (line.contains("Pwr Consumption") || line.contains("Power Consumption")) {
+                // 提取功耗值
+                java.util.regex.Pattern p = java.util.regex.Pattern.compile("(\\d+)\\s*W", java.util.regex.Pattern.CASE_INSENSITIVE);
+                java.util.regex.Matcher m = p.matcher(line);
+                if (m.find()) {
+                    int watts = Integer.parseInt(m.group(1));
+                    return watts > 0 ? "电源: ON" : "电源: OFF";
+                }
+            }
+        }
+        return "查询失败: 无法从传感器数据解析电源状态";
     }
 
     /**
@@ -441,11 +518,19 @@ public class IdracApiService {
             || sensorData.startsWith("Exec失败") || sensorData.startsWith("Shell失败"))
             return "--";
         String[] lines = sensorData.split("\n");
+        // 优先找 CPU1 Temp（更准确）
         for (String line : lines) {
-            String lower = line.toLowerCase();
-            if (lower.contains("temp") || lower.contains("cpu") || lower.contains("inlet")
-                || lower.contains("ambient") || lower.contains("system board")) {
-                java.util.regex.Pattern p = java.util.regex.Pattern.compile("(\\d+)\\s*[°º]?\\s*[cC]");
+            if (line.contains("CPU") && line.contains("Temp")) {
+                // 匹配 "38C" 或 "38 C" 格式
+                java.util.regex.Pattern p = java.util.regex.Pattern.compile("(\\d+)\\s*C");
+                java.util.regex.Matcher m = p.matcher(line);
+                if (m.find()) return m.group(1);
+            }
+        }
+        // 降级：找任意温度
+        for (String line : lines) {
+            if (line.toLowerCase().contains("temp") || line.toLowerCase().contains("inlet")) {
+                java.util.regex.Pattern p = java.util.regex.Pattern.compile("(\\d+)\\s*C");
                 java.util.regex.Matcher m = p.matcher(line);
                 if (m.find()) return m.group(1);
             }
@@ -457,9 +542,11 @@ public class IdracApiService {
         if (sensorData == null || sensorData.startsWith("获取失败") || sensorData.startsWith("SSH错误"))
             return "--";
         String[] lines = sensorData.split("\n");
+        // 找第一个包含 Fan 和 RPM 的行
         for (String line : lines) {
-            if (line.toLowerCase().contains("fan") && line.toLowerCase().contains("rpm")) {
-                java.util.regex.Pattern p = java.util.regex.Pattern.compile("(\\d{3,5})\\s*rpm", java.util.regex.Pattern.CASE_INSENSITIVE);
+            if (line.contains("Fan") && line.contains("RPM")) {
+                // 匹配 "4080RPM" 或 "4080 RPM" 格式
+                java.util.regex.Pattern p = java.util.regex.Pattern.compile("(\\d+)\\s*RPM", java.util.regex.Pattern.CASE_INSENSITIVE);
                 java.util.regex.Matcher m = p.matcher(line);
                 if (m.find()) return m.group(1);
             }
@@ -471,10 +558,19 @@ public class IdracApiService {
         if (sensorData == null || sensorData.startsWith("获取失败") || sensorData.startsWith("SSH错误"))
             return "--";
         String[] lines = sensorData.split("\n");
+        // 优先找 "Pwr Consumption" 行
         for (String line : lines) {
-            String lower = line.toLowerCase();
-            if (lower.contains("watt") || lower.contains("pwr") || lower.contains("power")) {
-                java.util.regex.Pattern p = java.util.regex.Pattern.compile("(\\d+)\\s*[wW]");
+            if (line.contains("Pwr Consumption") || line.contains("Power Consumption")) {
+                // 匹配 "196Watts" 或 "196 Watts" 格式
+                java.util.regex.Pattern p = java.util.regex.Pattern.compile("(\\d+)\\s*W", java.util.regex.Pattern.CASE_INSENSITIVE);
+                java.util.regex.Matcher m = p.matcher(line);
+                if (m.find()) return m.group(1);
+            }
+        }
+        // 降级：找任意包含 Watt 的行
+        for (String line : lines) {
+            if (line.toLowerCase().contains("watt") || line.toLowerCase().contains("pwr")) {
+                java.util.regex.Pattern p = java.util.regex.Pattern.compile("(\\d+)\\s*W", java.util.regex.Pattern.CASE_INSENSITIVE);
                 java.util.regex.Matcher m = p.matcher(line);
                 if (m.find()) return m.group(1);
             }
@@ -502,8 +598,11 @@ public class IdracApiService {
         String exhaustTemp = "";
         String firmwareVersion = "";
 
+        android.util.Log.d("iDRAC_API", "parseHardwareSummary: sysInfo length=" + (sysInfo != null ? sysInfo.length() : 0));
         String[] lines = sysInfo.split("\n");
+        android.util.Log.d("iDRAC_API", "parseHardwareSummary: " + lines.length + " lines");
         for (String line : lines) {
+            android.util.Log.d("iDRAC_API", "parseHardwareSummary: line=[" + line + "]");
             // 支持 "Key = Value" 格式
             if (line.contains("=")) {
                 String[] parts = line.split("=", 2);
